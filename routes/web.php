@@ -9,6 +9,7 @@ use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\SocialController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminControllerDashboard;
+use App\Http\Controllers\AdminCategoryProductsController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -59,6 +60,16 @@ Route::prefix('admin')->group(function () {
         Route::post('/categories',          [AdminControllerDashboard::class, 'storeCategory']);
         Route::put('/categories/{category}', [AdminControllerDashboard::class, 'updateCategory']);
         Route::delete('/categories/bulk-delete', [AdminControllerDashboard::class, 'bulkDeleteCategories']);
+
+
+       Route::get('/categories/{category}/products', [AdminCategoryProductsController::class, 'index']);
+    Route::post('/products', [AdminCategoryProductsController::class, 'store']);
+    Route::put('/products/{product}', [AdminCategoryProductsController::class, 'update']);
+    Route::delete('/products/{product}', [AdminCategoryProductsController::class, 'destroy']);
+
+
+
+
 
     });
 });

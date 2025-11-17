@@ -92,7 +92,7 @@ export default function Products() {
                     </p>
 
                     <p className="text-gray-700 dark:text-gray-100 mt-4 font-bold text-lg">
-                      ${Number(product.price).toFixed(2)}
+                      Bs{Number(product.price).toFixed(2)}
                     </p>
 
                     <button

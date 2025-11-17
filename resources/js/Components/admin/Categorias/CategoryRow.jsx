@@ -1,4 +1,5 @@
-// resources/js/Components/admin/CategoryRow.jsx
+import { router } from "@inertiajs/react";
+
 export default function CategoryRow({
   category,
   isSelectable,
@@ -25,16 +26,19 @@ export default function CategoryRow({
           <p className="text-gray-500 text-sm">{category.description || "Sin descripción"}</p>
         </div>
       </div>
+
       <div className="flex gap-2 mt-2 sm:mt-0">
+
         <button
           className="text-yellow-600 font-semibold hover:text-yellow-800"
           onClick={() => onEdit(category)}
         >
           Editar
         </button>
+
         <button
           className="text-blue-600 font-semibold hover:text-blue-800"
-          onClick={() => onView(category.id)}
+          onClick={() => router.get(`/admin/categories/${category.id}/products`)}
         >
           Ver productos →
         </button>
