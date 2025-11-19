@@ -75,10 +75,11 @@ export default function Products() {
       />
 
       {displayedCategories.map((category, idx) => {
-        const filteredProducts = category.products.filter(product =>
-          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.description.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        const filteredProducts = category.products.filter(product => {
+  const name = (product.name ?? "").toLowerCase();
+  const search = searchTerm.toLowerCase();
+  return name.includes(search);
+});
 
         if (filteredProducts.length === 0) return null;
 
