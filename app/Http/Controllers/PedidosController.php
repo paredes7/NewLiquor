@@ -72,4 +72,9 @@ class PedidosController extends Controller
             return redirect()->route('checkout')->with('error', 'Error al crear el pedido: ' . $e->getMessage());
         }
     }
+
+
+
+
+    
 }

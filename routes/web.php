@@ -10,6 +10,7 @@ use App\Http\Controllers\SocialController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminControllerDashboard;
 use App\Http\Controllers\AdminCategoryProductsController;
+use App\Http\Controllers\OrderController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -66,7 +67,13 @@ Route::prefix('admin')->group(function () {
     Route::post('/products', [AdminCategoryProductsController::class, 'store']);
     Route::put('/products/{product}', [AdminCategoryProductsController::class, 'update']);
     Route::delete('/products/{product}', [AdminCategoryProductsController::class, 'destroy']);
-
+//mostar estados y metodos de pago
+Route::get('/orders/meta', [OrderController::class, 'meta']);
+        // Ordenes
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/{order}', [OrderController::class, 'show']);
+    Route::put('/orders/{order}', [OrderController::class, 'update']);
+    Route::delete('/orders/{order}', [OrderController::class, 'destroy']);
 
 
 

@@ -12,19 +12,25 @@ class AdminControllerDashboard extends Controller
     /** 
      * Página principal del panel admin con categorías (Inertia)
      */
-    public function index(Request $request)
-    {
-        $perPage = $request->integer('perPage', 4);
+ public function index(Request $request)
+{
+    $perPage = $request->integer('perPage', 4);
+    $search = $request->string('search', '');
 
-        $categories = Category::select('id', 'name', 'slug', 'description')
-            ->withCount('products') // Mejor que traer productos enteros
-            ->paginate($perPage)
-            ->onEachSide(1);
+    $categories = Category::select('id', 'name', 'slug', 'description')
+        ->withCount('products')
+        ->when($search, function($query, $search) {
+            $query->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+        })
+        ->paginate($perPage)
+        ->onEachSide(1);
 
-        return Inertia::render('Admin/AdminDashboard', [
-            'categories' => $categories
-        ]);
-    }
+    return Inertia::render('Admin/AdminDashboard', [
+        'categories' => $categories,
+        'filters'    => ['search' => $search], // Opcional: para mantener el valor en React
+    ]);
+}
 
     /**
      * Crear una nueva categoría (AJAX)
@@ -88,15 +94,20 @@ class AdminControllerDashboard extends Controller
     /**
      * Paginación vía AJAX (React)
      */
-    public function paginateCategories(Request $request)
-    {
-        $perPage = $request->integer('perPage', 4);
+  public function paginateCategories(Request $request)
+{
+    $perPage = $request->integer('perPage', 4);
+    $search  = $request->string('search', '');
 
-        $categories = Category::select('id', 'name', 'slug', 'description')
-            ->withCount('products')
-            ->paginate($perPage)
-            ->onEachSide(1);
+    $categories = Category::select('id', 'name', 'slug', 'description')
+        ->withCount('products')
+        ->when($search, function($query, $search) {
+            $query->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+        })
+        ->paginate($perPage)
+        ->onEachSide(1);
 
-        return response()->json($categories);
-    }
+    return response()->json($categories);
+}
 }

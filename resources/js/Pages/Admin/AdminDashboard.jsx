@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Head } from "@inertiajs/react";
 import AdminHeader from "@/Components/admin/AdminHeader.jsx";
 import CategoriesSection from "@/Components/admin/Categorias/CategoriesSection.jsx";
+import OrdersSection from "@/Components/admin/Orders/OrdersSection.jsx";
 
 export default function AdminDashboard({ categories = [] }) {
   const section1Ref = useRef(null);
@@ -48,7 +49,7 @@ export default function AdminDashboard({ categories = [] }) {
             onClick={() => scrollToSection(section2Ref)}
             className="px-6 py-4 bg-white rounded-2xl shadow-lg text-base sm:text-lg font-semibold text-gray-800 hover:bg-yellow-100 transition w-full"
           >
-            Sección 2
+            Órdenes
           </button>
 
           <button
@@ -60,17 +61,13 @@ export default function AdminDashboard({ categories = [] }) {
         </div>
       </section>
 
-      {/* SECCIÓN 1 — CATEGORÍAS */}
+
       <section ref={section1Ref} className="min-h-screen flex justify-center items-center px-4">
         <CategoriesSection categories={categories} />
       </section>
 
-      {/* SECCIÓN 2 */}
       <section ref={section2Ref} className="min-h-screen flex justify-center items-center px-4">
-        <div className="bg-white rounded-2xl shadow-xl p-10 max-w-6xl w-[95%] sm:w-full text-gray-500 text-center">
-          <h2 className="text-2xl sm:text-3xl font-semibold mb-6 text-gray-700">Espacio 2</h2>
-          <p>Reservado para futura funcionalidad.</p>
-        </div>
+        <OrdersSection  />
       </section>
 
       {/* SECCIÓN 3 */}

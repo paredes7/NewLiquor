@@ -12,17 +12,25 @@ export default function Products() {
   const { addToCart } = useCart();
 
   useEffect(() => {
-    fetch('/products')
-      .then(res => res.json())
-      .then(data => {
+  fetch('/products')
+    .then(res => res.json())
+    .then(data => {
+      // Protección: asegurarse de que 'data' sea un array
+      if (!Array.isArray(data)) {
+        console.error('Datos recibidos no son un array:', data);
+        setCategories([]);
+      } else {
         setCategories(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error al cargar productos:', err);
-        setLoading(false);
-      });
-  }, []);
+        
+      }
+      setLoading(false);
+    })
+    .catch(err => {
+      console.error('Error al cargar productos:', err);
+      setCategories([]); // evitar que map falle
+      setLoading(false);
+    });
+}, []);
 
   const handleAddToCart = async (product) => {
     setAddingId(product.id); // mostrar loading

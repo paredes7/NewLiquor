@@ -1,0 +1,88 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Models\Order;
+use Illuminate\Http\Request;
+
+class OrderController extends Controller
+{
+    /**
+     * Listar todas las órdenes (JSON)
+     */
+public function index(Request $request)
+{
+    $query = Order::with(['user', 'status', 'paymentMethod']);
+
+    // BÚSQUEDA REAL AGRUPADA
+    if ($request->search) {
+        $search = $request->search;
+
+        $query->where(function ($q) use ($search) {
+            $q->where('id', 'LIKE', "%$search%")
+              ->orWhereHas('user', function ($u) use ($search) {
+                  $u->where('name', 'LIKE', "%$search%");
+              });
+        });
+    }
+
+    // PAGINACIÓN REAL
+    $orders = $query->orderByDesc('id')->paginate(7);
+
+    return response()->json($orders);
+}
+
+    /**
+     * Mostrar detalle de una orden (JSON)
+     */
+    public function show(Order $order)
+    {
+        $order->load(['user', 'status', 'paymentMethod', 'items.product']);
+        return response()->json($order);
+    }
+
+    /**
+     * Actualizar una orden (JSON)
+     */
+    public function update(Request $request, Order $order)
+    {
+        $request->validate([
+            'status_id'         => 'required|exists:order_statuses,id',
+            'payment_method_id' => 'required|exists:payment_methods,id',
+            'total'             => 'required|numeric|min:0',
+            'note'              => 'nullable|string|max:500',
+            'delivery_date'     => 'nullable|date',
+            'delivery_time'     => 'nullable|string|max:10',
+        ]);
+
+        $order->update($request->only([
+            'status_id', 'payment_method_id', 'total', 'note', 'delivery_date', 'delivery_time'
+        ]));
+
+        return response()->json([
+            'success' => true,
+            'order'   => $order,
+        ]);
+    }
+
+    /**
+     * Eliminar una orden (JSON)
+     */
+    public function destroy(Order $order)
+    {
+        $order->delete();
+        return response()->json(['success' => true]);
+    }
+        //para ver los estados y metodos de pago    
+    public function meta()
+{
+    $statuses = \App\Models\OrderStatus::all();
+    $payments = \App\Models\PaymentMethod::all();
+
+    return response()->json([
+        'statuses' => $statuses,
+        'payments' => $payments,
+    ]);
+}
+}

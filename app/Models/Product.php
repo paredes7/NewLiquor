@@ -17,6 +17,7 @@ class Product extends Model
         'stock',
         'available',
         'image',
+        'old_price',
     ];
 
     // Si quieres, relación con categoría
