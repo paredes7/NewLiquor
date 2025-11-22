@@ -21,15 +21,15 @@ export default function Products() {
   const priorityCategories = ['Destacados', 'Ofertas'];
 
   // Mini logo dorado tipo águila (SVG)
-const EagleIcon = ({ size = 60 }) => (
-  <img
-    src="https://res.cloudinary.com/dcmjhycsr/image/upload/v1763825595/Captura_de_pantalla_2025-11-22_102220-removebg-preview_eur39c.png"  // ruta relativa a public/
-    alt="Águila"
-    width={size}
-    height={size}
-    style={{ display: 'inline-block' }}
-  />
-);
+  const EagleIcon = ({ size = 60 }) => (
+    <img
+      src="https://res.cloudinary.com/dcmjhycsr/image/upload/v1763825595/Captura_de_pantalla_2025-11-22_102220-removebg-preview_eur39c.png"  // ruta relativa a public/
+      alt="Águila"
+      width={size}
+      height={size}
+      style={{ display: 'inline-block' }}
+    />
+  );
 
   useEffect(() => {
     setLoading(true);
@@ -120,17 +120,29 @@ const EagleIcon = ({ size = 60 }) => (
               </div>
             )}
 
-            {/* 🦅 Título de categoría con mini águila */}
-            <div className="relative mb-6">
-              <div className="absolute -top-3 left-0 w-20 h-1 bg-[#D4AF37] rounded-full shadow-lg"></div>
+            {/* 🦅 Título de categoría con mini águila (versión premium cursiva) */}
+            <div className="relative mb-8  select-none">
 
-              <h2 className="text-4xl font-extrabold tracking-wide flex items-center gap-3">
-                <EagleIcon />
-                <span className="text-[#D4AF37] drop-shadow-md">{category.name}</span>
+              {/* Línea superior con brillo */}
+              <div className="absolute -top-3 left-0 w-28 h-1 bg-gradient-to-r from-[#D4AF37] to-[#f8e7a3] shadow-[0_0_10px_#D4AF37] rounded-full"></div>
+
+              {/* Título en cursiva */}
+              <h2
+                className="
+      md:text-5xl text-4xl font-extrabold italic flex items-center gap-4 tracking-wide
+      drop-shadow-[0_0_8px_rgba(212,175,55,0.6)]
+      text-transparent bg-clip-text
+      bg-gradient-to-r from-[#D4AF37] to-[#fcefc2]
+    "
+              >
+                <EagleIcon className="w-10 h-10 drop-shadow-[0_0_6px_#D4AF37]" />
+                {category.name}
               </h2>
 
-              <div className="mt-2 h-1 w-full bg-gradient-to-r from-[#D4AF37]/80 to-transparent rounded-full"></div>
+              {/* Línea inferior */}
+              <div className="mt-3 h-1 w-full bg-gradient-to-r from-[#D4AF37]/90 to-transparent rounded-full shadow-[0_0_10px_#D4AF37]"></div>
             </div>
+
 
             {/* 📝 Descripción opcional */}
             {category.description && (
@@ -142,6 +154,7 @@ const EagleIcon = ({ size = 60 }) => (
             {/* 🛒 Productos */}
             {(isDesktopCarousel || isTabletCarousel || isMobileCarousel) ? (
               <Swiper
+                className="z-[1]"
                 modules={[Navigation, Pagination, Autoplay]}
                 spaceBetween={20}
                 slidesPerView={1}
@@ -153,7 +166,11 @@ const EagleIcon = ({ size = 60 }) => (
                   768: { slidesPerView: 2 },
                   1024: { slidesPerView: 3 },
                 }}
+                style={{
+                  '--swiper-navigation-color': '#000', // Esto cambia las flechas a negro
+                }}
               >
+             
                 {filteredProducts.map(product => (
                   <SwiperSlide key={product.id}>
                     <ProductCard

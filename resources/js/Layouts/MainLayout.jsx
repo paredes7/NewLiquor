@@ -20,14 +20,23 @@ export default function Layout({ title, auth, children }) {
         </main>
         <Footer />
 
-        <CartIcon onClick={() => setCartOpen(true)} />
-        <CartModal isOpen={isCartOpen} onClose={() => setCartOpen(false)} />
+        {/* Carrito */}
+        <div className="fixed bottom-6 right-6 z-[9999]">
+          <CartIcon onClick={() => setCartOpen(true)} />
+        </div>
+
+        {/* Modal del carrito */}
+        <CartModal
+          isOpen={isCartOpen}
+          onClose={() => setCartOpen(false)}
+          className="z-[99999]"
+        />
 
         {/* Botón WhatsApp */}
         <a
           href="https://wa.me/63736494"
           target="_blank"
-          className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-green-500 shadow-xl flex items-center justify-center hover:bg-green-600 transition"
+          className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-green-500 shadow-xl flex items-center justify-center hover:bg-green-600 transition z-[9999]"
         >
           <img
             src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"

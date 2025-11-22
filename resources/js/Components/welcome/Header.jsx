@@ -25,12 +25,12 @@ export default function Header({ auth }) {
             <img
               src="https://res.cloudinary.com/dcmjhycsr/image/upload/v1763822761/Captura_de_pantalla_2025-11-22_102201-removebg-preview_2_wllmrp.png"
               alt="Logo de la empresa"
-              className="h-20 w-52 md:h-40 md:w-72 object-contain transition-transform duration-300 hover:scale-105 drop-shadow-lg"
+              className="h-20 w-40 md:h-40 md:w-72 object-contain transition-transform duration-300 hover:scale-105 drop-shadow-lg"
             />
           </Link>
 
           {/* NAV */}
-          <nav className="flex   md:text-xl md:gap-10 text-xs gap-2 font-medium">
+          <nav className="flex  md:text-xl md:gap-10 text-xs gap-1 font-medium">
             {auth?.user ? (
 
                 <Link
