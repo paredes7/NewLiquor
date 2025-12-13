@@ -131,7 +131,7 @@ export default function CartModaladmin({ isOpen, onClose }) {
                 </div>
                 <div className="text-right flex flex-col justify-between h-full">
                   <p className="font-bold">
-                    Bs {(item.price * item.qty).toFixed(2)}
+                    $ {(item.price * item.qty).toFixed(2)}
                   </p>
                   <button
                     className="text-gray-600 text-sm mt-1 hover:text-gray-800"
@@ -150,7 +150,7 @@ export default function CartModaladmin({ isOpen, onClose }) {
           <div className="mt-4 border-t border-gray-300 pt-4 flex flex-col gap-4">
             <p className="flex justify-between font-bold text-lg">
               <span>Total:</span>
-              <span>Bs {total.toFixed(2)}</span>
+              <span>$ {total.toFixed(2)}</span>
             </p>
 
 

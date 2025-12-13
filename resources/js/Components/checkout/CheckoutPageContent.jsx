@@ -45,7 +45,6 @@ export default function CheckoutPageContent() {
             size: item.options.size || item.variant || item.options.variant,
         }));
 
-        // Construir mensaje llamativo para WhatsApp
         const messageLines = [
             `🛒 *Nuevo Pedido de ${customerName}*`,
             `📞 Teléfono: ${customerPhone}`,
@@ -62,13 +61,11 @@ export default function CheckoutPageContent() {
         messageLines.push('', `*Total: $${total}*`);
 
         const whatsappMessage = encodeURIComponent(messageLines.join('\n'));
-        const whatsappNumber = "59169791784";
+        const whatsappNumber = "56978843627"; 
         const whatsappURL = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
-        // Abrir WhatsApp en nueva pestaña primero
         window.open(whatsappURL, '_blank');
 
-        // Registrar pedido en el backend después de abrir WhatsApp
         setTimeout(() => {
             const paymentMethodId = paymentMethod === "qr" ? 1 : 2;
 
@@ -100,8 +97,8 @@ export default function CheckoutPageContent() {
         <Layout title="Checkout">
             <Head title="Checkout" />
 
-            <div className="max-w-3xl mx-auto p-6 bg-white text-black rounded-2xl shadow-lg border border-gray-300">
-                <CheckoutHeader />
+            <div className="max-w-3xl mx-auto p-6 bg-white text-grayCustom rounded-2xl shadow-lg border border-gray-200">
+                <CheckoutHeader className="text-turquoise mb-4" />
 
                 <CustomerInfoForm
                     customerName={customerName}
@@ -110,17 +107,17 @@ export default function CheckoutPageContent() {
                     setCustomerPhone={setCustomerPhone}
                     customerMail={customerMail}
                     setCustomerMail={setCustomerMail}
-                    className="mb-6"
+                    className="mb-6 bg-darkGray/10 rounded-lg p-4"
                 />
 
-                <CartItems cart={cart} loading={loading} subtotal={subtotal} total={total} className="mb-6" />
+                <CartItems cart={cart} loading={loading} subtotal={subtotal} total={total} className="mb-6 bg-turquoise/10 rounded-lg p-4" />
 
-                <MethodPay method={paymentMethod} setMethod={setPaymentMethod} />
+                <MethodPay method={paymentMethod} setMethod={setPaymentMethod} className="mb-6" />
 
-                <OrderSummary cart={cart} subtotal={subtotal} total={total} loading={loading} className="mb-6" />
+                <OrderSummary cart={cart} subtotal={subtotal} total={total} loading={loading} className="mb-6 bg-darkTurquoise/10 rounded-lg p-4" />
 
                 <button
-                    className={`w-full bg-black hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-lg shadow-md flex justify-center items-center transition-all duration-300 ${(loading || processing) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`w-full bg-turquoise hover:bg-darkTurquoise text-white font-bold py-3 px-6 rounded-lg shadow-md flex justify-center items-center transition-all duration-300 ${(loading || processing) ? 'opacity-50 cursor-not-allowed' : ''}`}
                     onClick={handlePlaceOrder}
                     disabled={loading || processing}
                 >
@@ -130,7 +127,7 @@ export default function CheckoutPageContent() {
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                         </svg>
                     )}
-                    {processing ? "⏳ Enviando a WhatsApp y registrando..." : " Enviar a WhatsApp y registrar pedido"}
+                    {processing ? "⏳ Enviando a WhatsApp y registrando..." : "Enviar a WhatsApp y registrar pedido"}
                 </button>
             </div>
         </Layout>

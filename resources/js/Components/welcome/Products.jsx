@@ -38,7 +38,7 @@ export default function Products({ categories: initialCategories = [], search: i
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
-      <section className="text-black p-4">
+      <section className="text-white p-4">
         {categories.map((category, idx) => {
           const filteredProducts = category.products.filter(product =>
             product.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -48,55 +48,96 @@ export default function Products({ categories: initialCategories = [], search: i
 
           return (
             <div key={category.id} className="mb-12">
-              {idx !== 0 && <hr className="border-gray-300 my-12" />}
+              {idx !== 0 && (
+                <hr className="border-grayCustom/30 my-12" />
+              )}
+
               
-              {/* Categoría principal */}
               <div className="relative mb-6">
                 <h2
-                  className="text-4xl md:text-5xl font-bold text-black tracking-[2px] uppercase pl-4 py-2 border-l-[6px] border-black"
+                  className="
+                text-4xl
+                md:text-5xl
+                font-bold
+                tracking-[2px]
+                uppercase
+                pl-4
+                py-2
+                border-l-[6px]
+                border-turquoise
+                text-turquoise
+              "
                   style={{ fontFamily: "'Playfair Display', serif" }}
                 >
                   {category.name}
                 </h2>
+
                 {category.description && (
-                  <p className="text-gray-600 mt-2 italic pl-2">
+                  <p className="text-grayCustom mt-2 italic pl-4">
                     {category.description}
                   </p>
                 )}
               </div>
 
-              {filteredProducts.length > 0 && <CategorySwiper products={filteredProducts} />}
+              {filteredProducts.length > 0 && (
+                <CategorySwiper products={filteredProducts} />
+              )}
 
-              {/* Subcategorías */}
-              {hasChildren && category.children.map((sub, subIdx) => {
-                const filteredSubProducts = sub.products.filter(product =>
-                  product.name.toLowerCase().includes(searchTerm.toLowerCase())
-                );
+              
+              {hasChildren &&
+                category.children.map(sub => {
+                  const filteredSubProducts = sub.products.filter(product =>
+                    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+                  );
 
-                return (
-                  <div key={sub.id} className="mt-12">
-                    <h3
-                      className="text-2xl mb-10 md:text-3xl font-semibold text-gray-900 tracking-wide pl-3 border-l-4"
-                      style={{ fontFamily: "'Playfair Display', serif" }}
-                    >
-                      {sub.name}
-                    </h3>
+                  return (
+                    <div key={sub.id} className="mt-12">
+                      <h3
+                        className="
+                      text-2xl
+                      md:text-3xl
+                      font-semibold
+                      tracking-wide
+                      pl-3
+                      border-l-4
+                      border-darkTurquoise
+                      text-grayCustom
+                      mb-10
+                    "
+                        style={{ fontFamily: "'Playfair Display', serif" }}
+                      >
+                        {sub.name}
+                      </h3>
 
-                    {filteredSubProducts.length > 0 && <CategorySwiper products={filteredSubProducts} />}
-                  </div>
-                );
-              })}
+                      {filteredSubProducts.length > 0 && (
+                        <CategorySwiper products={filteredSubProducts} />
+                      )}
+                    </div>
+                  );
+                })}
             </div>
           );
         })}
 
-        {/* Botón para cargar más categorías */}
+       
         {hasMore && (
-          <div className="flex justify-center mt-6">
+          <div className="flex justify-center mt-10">
             <button
               onClick={handleVerMasCategorias}
               disabled={loading}
-              className="px-6 py-2 rounded-xl border border-black text-black font-semibold hover:bg-black hover:text-white transition disabled:opacity-50"
+              className="
+            px-8
+            py-3
+            rounded-xl
+            border
+            border-turquoise
+            text-turquoise
+            font-semibold
+            hover:bg-turquoise
+            hover:text-darkGray
+            transition
+            disabled:opacity-50
+          "
             >
               {loading ? 'Cargando...' : 'Ver más categorías'}
             </button>
@@ -114,27 +155,48 @@ function CategorySwiper({ products }) {
 
   return isDesktopCarousel ? (
     <Swiper
-      className="z-[1] py-4"
+      className="z-[1] py-6"
       modules={[Navigation, Pagination, Autoplay]}
       spaceBetween={24}
       slidesPerView={1}
       navigation
-      autoplay={{ delay: 3000, disableOnInteraction: false }}
+      autoplay={{ delay: 3500, disableOnInteraction: false }}
       breakpoints={{
         640: { slidesPerView: 2 },
         768: { slidesPerView: 2 },
         1024: { slidesPerView: 3 },
       }}
-      style={{ '--swiper-navigation-color': '#000' }}
+      style={{
+        '--swiper-navigation-color': '#01a387',
+        '--swiper-pagination-color': '#01a387',
+      }}
     >
-      {products.map(product => (
-        <SwiperSlide
-          key={product.id}
-          className={`w-full h-full relative overflow-hidden rounded-3xl shadow-xl bg-white text-black flex justify-center ${product.variants?.reduce((sum, v) => sum + v.stock, 0) === 0 ? "border-black opacity-80" : "border-gray-200"}`}
-        >
-          <ProductCard product={product} />
-        </SwiperSlide>
-      ))}
+      {products.map(product => {
+        const outOfStock =
+          product.variants?.reduce((sum, v) => sum + v.stock, 0) === 0;
+
+        return (
+          <SwiperSlide
+            key={product.id}
+            className={`
+              w-full
+              h-full
+              relative
+              overflow-hidden
+              rounded-3xl
+              shadow-xl
+              bg-white
+              text-black
+              flex
+              justify-center
+              border
+              ${outOfStock ? 'border-darkTurquoise opacity-80' : 'border-gray-200'}
+            `}
+          >
+            <ProductCard product={product} />
+          </SwiperSlide>
+        );
+      })}
     </Swiper>
   ) : (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">

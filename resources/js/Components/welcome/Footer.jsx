@@ -1,35 +1,40 @@
-import { FaInstagram, FaTiktok } from "react-icons/fa";
+import { FaInstagram } from "react-icons/fa";
 
 export default function Footer() {
   return (
     <footer
-      className="bg-black text-center py-10 mt-10 border-t border-gray-800 shadow-inner"
-      style={{ fontFamily: "'Playfair Display', serif", letterSpacing: '1px' }}
+      className="bg-darkGray text-center py-12 mt-10 border-t border-darkTurquoise shadow-inner"
+      
     >
-      {/* Derechos reservados */}
-      <p className="text-white font-medium tracking-wide mb-6">
-        © {new Date().getFullYear()} Exclusive — Todos los derechos reservados.
+    
+      <p className="text-grayCustom font-medium tracking-wide mb-6">
+        © {new Date().getFullYear()} Maro Uniformes — Todos los derechos reservados.
       </p>
 
-      {/* Redes sociales */}
-      <div className="flex justify-center space-x-6 mb-6 text-white">
-        <a href="https://www.instagram.com/exclusiveoruro?igsh=MWs1NmVzZzV0d3gyMw==" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
-          <FaInstagram size={24} />
+      
+      <div className="flex justify-center mb-6">
+        <a
+          href="https://www.instagram.com/marouniformes2023"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-turquoise hover:text-darkTurquoise transition-colors"
+        >
+          <FaInstagram size={36} />
         </a>
-        <a href="https://www.tiktok.com/@exclusive_oruro1?_r=1&_t=ZM-91yD4bYr6yJ" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
-          <FaTiktok size={24} />
-        </a>
-      </div>
+      </div> 
+ 
+      <div className="text-grayCustom text-sm space-y-3">
+        <p className="text-lg text-turquoise font-semibold">
+           56 978843627
+        </p>
 
-      {/* Información de contacto y sucursales */}
-      <div className="text-gray-400 text-sm space-y-3">
-        <p>Contacto: info@exclusive.com</p>
-        <p>Política de privacidad | Términos de uso</p>
+        <p className="text-xs tracking-wide">
+          Política de privacidad | Términos de uso
+        </p>
 
-        <div className="mt-3 text-white font-semibold">
-          <p>BOLIVIA 🇧🇴</p>
-          <p>Oruro #1: 6 de Octubre y Herrera, 1er piso — Lunes a Sábado 9:00am - 21:00pm</p>
-          <p>Oruro #2: Junín y Pagador, Edificio Ruby (al lado de los baños)</p>
+        <div className="mt-4 text-grayCustom font-medium">
+          <p className="text-turquoise font-semibold mb-1">CHILE 🇨🇱</p>
+          <p>Atención personalizada vía WhatsApp e Instagram</p>
         </div>
       </div>
     </footer>

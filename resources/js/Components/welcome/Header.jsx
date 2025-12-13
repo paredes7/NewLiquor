@@ -17,37 +17,50 @@ export default function Header({ auth }) {
 
   return (
     <>
-      <header className="w-full bg-white text-black shadow-lg py-4 border-b-2 border-black">
+      <header className="w-full bg-darkGray text-black shadow-lg py-4 border-b-2 border-black">
         <div className="container mx-auto flex justify-between items-center px-6">
 
-        
+
           <Link href="/" className="flex items-center gap-3">
             <img
-              src="https://res.cloudinary.com/ds2tkqwtr/image/upload/v1765626355/exclusive-removebg-preview_k132nu.png"
+              src="https://res.cloudinary.com/dnbklbswg/image/upload/v1765627552/Captura_de_pantalla_2025-12-13_075927-removebg-preview_m4lqsz.png"
               alt="Logo de la tienda"
               className="h-20 w-40 md:h-40 md:w-72 object-contain transition-transform duration-300 hover:scale-105 drop-shadow-lg"
             />
           </Link>
 
-          
+
           <nav className="flex md:text-xl md:gap-10 text-xs gap-1 font-medium">
             <Link
               href="/Contacto"
-              className="relative text-xl font-semibold text-black transition duration-300 
-             hover:text-gray-800
-             after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-0 
-             after:bg-black after:transition-all after:duration-300 hover:after:w-full"
-              style={{ fontFamily: "'Playfair Display', serif", letterSpacing: '1px' }}
+              className="
+      relative
+      text-xl
+      font-semibold
+      text-grayCustom
+      transition-all
+      duration-300
+      hover:text-turquoise
+
+      after:absolute
+      after:left-0
+      after:-bottom-1
+      after:h-[2px]
+      after:w-0
+      after:bg-darkTurquoise
+      after:transition-all
+      after:duration-300
+      hover:after:w-full
+    "
             >
               Contacto
             </Link>
-
-
           </nav>
+
         </div>
       </header>
 
-      {/* FLASH MESSAGE */}
+
       {flashMessage && (
         <div
           className={`fixed top-20 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-500 

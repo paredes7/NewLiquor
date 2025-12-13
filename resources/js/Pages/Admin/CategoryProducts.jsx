@@ -126,7 +126,7 @@ const [currentProduct, setCurrentProduct] = useState(null);
               </p>
 
               <p className="text-gray-700 dark:text-gray-100 mt-2 font-bold text-base sm:text-lg">
-                Bs {Number(product.price).toFixed(2)}
+                $ {Number(product.price).toFixed(2)}
               </p>
 
               <div className="flex gap-2 mt-4">

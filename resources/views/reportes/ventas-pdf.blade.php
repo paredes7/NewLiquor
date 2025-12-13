@@ -15,7 +15,7 @@
 
     <h3>Resumen General</h3>
     <p>Total de pedidos: {{ $totales->total_pedidos ?? 0 }}</p>
-    <p>Total vendido: Bs {{ $totales->total_vendido ?? 0 }}</p>
+    <p>Total vendido: $ {{ $totales->total_vendido ?? 0 }}</p>
     <p>Total de ítems vendidos: {{ $totales->total_items_vendidos ?? 0 }}</p>
 
     <h3>Detalle de Pedidos</h3>
@@ -25,7 +25,7 @@
                 <th>Pedido</th>
                 <th>Producto</th>
                 <th>Cantidad</th>
-                <th>Subtotal (Bs)</th>
+                <th>Subtotal ($)</th>
             </tr>
         </thead>
         <tbody>
@@ -46,7 +46,7 @@
             <tr>
                 <th>Producto</th>
                 <th>Cantidad Total</th>
-                <th>Total Generado (Bs)</th>
+                <th>Total Generado (v)</th>
             </tr>
         </thead>
         <tbody>

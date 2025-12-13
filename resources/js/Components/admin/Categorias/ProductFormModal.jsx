@@ -116,7 +116,7 @@ export default function ProductFormModal({ categoryId, product, onClose, onSave 
               </div>
 
               <div>
-                <label className="block text-gray-700 font-medium mb-1">Precio (Bs)</label>
+                <label className="block text-gray-700 font-medium mb-1">Precio ($)</label>
                 <input
                   type="number"
                   name="price"

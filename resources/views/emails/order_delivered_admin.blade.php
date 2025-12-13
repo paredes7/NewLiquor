@@ -6,4 +6,4 @@
     <li>{{ $item->product->name }} - Cantidad: {{ $item->quantity }} - Stock actual: {{ $item->product->stock }}</li>
 @endforeach
 </ul>
-<p>Total: Bs{{ number_format($order->total, 2) }}</p>
+<p>Total: ${{ number_format($order->total, 2) }}</p>

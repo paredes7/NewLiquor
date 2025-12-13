@@ -43,7 +43,7 @@ export default function ProductCardadmin({ product }) {
         </div>
 
         <p className="text-2xl font-extrabold tracking-wide text-gray-900">
-          Bs {Number(product.price).toFixed(2)}
+          $ {Number(product.price).toFixed(2)}
         </p>
       </div>
     </Link>

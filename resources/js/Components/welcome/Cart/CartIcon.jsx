@@ -9,10 +9,44 @@ export default function CartIcon({ onClick }) {
       className="fixed top-1/2 right-0 -translate-y-1/2 flex items-center cursor-pointer z-50"
       onClick={onClick}
     >
-      <div className="bg-black w-14 h-40 rounded-l-full shadow-lg flex flex-col items-center justify-center  relative">
-        <ShoppingCart size={32} className="text-white" />
+      <div
+        className="
+          bg-darkGray
+          w-14
+          h-40
+          rounded-l-full
+          shadow-xl
+          flex
+          flex-col
+          items-center
+          justify-center
+          relative
+          transition-all
+          duration-300
+          hover:bg-darkTurquoise
+        "
+      >
+        <ShoppingCart size={32} className="text-turquoise" />
+
         {cartCount > 0 && (
-          <span className="absolute -mt-8 -right-0 bg-white text-black text-xs font-bold w-7 h-7 rounded-full flex items-center justify-center shadow-sm">
+          <span
+            className="
+              absolute
+              -top-3
+              right-2
+              bg-turquoise
+              text-darkGray
+              text-xs
+              font-bold
+              w-7
+              h-7
+              rounded-full
+              flex
+              items-center
+              justify-center
+              shadow-md
+            "
+          >
             {cartCount}
           </span>
         )}

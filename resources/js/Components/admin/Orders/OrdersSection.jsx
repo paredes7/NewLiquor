@@ -164,7 +164,7 @@ export default function OrdersSection() {
                     {order.payment_method?.name || "-"}
                   </td>
                   <td className="text-center border px-2">{order.status?.name || "-"}</td>
-                  <td className="text-center border px-2">{order.total} bs</td>
+                  <td className="text-center border px-2">{order.total} $</td>
 
                   <td className="px-2 py-2 border flex flex-wrap gap-1 justify-center">
                     <button

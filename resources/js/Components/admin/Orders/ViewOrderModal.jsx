@@ -49,9 +49,9 @@ export default function ViewOrderModal({ order, onClose }) {
                       </div>
                     </td>
                     <td className="py-2 px-3 border-b">{item.sku}</td>
-                    <td className="py-2 px-3 border-b">{price.toFixed(2)} bs</td>
+                    <td className="py-2 px-3 border-b">{price.toFixed(2)} $</td>
                     <td className="py-2 px-3 border-b">{item.quantity}</td>
-                    <td className="py-2 px-3 border-b">{subtotal.toFixed(2)} bs</td>
+                    <td className="py-2 px-3 border-b">{subtotal.toFixed(2)} $</td>
                   </tr>
                 );
               })}
@@ -59,7 +59,7 @@ export default function ViewOrderModal({ order, onClose }) {
             <tfoot>
               <tr>
                 <td colSpan="5" className="py-2 px-3 font-semibold text-right border-t">Total:</td>
-                <td className="py-2 px-3 font-semibold border-t">{total.toFixed(2)} bs</td>
+                <td className="py-2 px-3 font-semibold border-t">{total.toFixed(2)} $</td>
               </tr>
             </tfoot>
           </table>

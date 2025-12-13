@@ -3,27 +3,36 @@ import { Home } from 'lucide-react';
 
 export default function CheckoutHeader() {
     return (
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-start mb-8">
             <div>
-                <h1  className="text-4xl font-semibold text-black"
-                    style={{ fontFamily: "'Playfair Display', serif", letterSpacing: '1px' }}>Checkout</h1>
-
-                <h2
-                    className="text-4xl font-semibold text-black"
+                {/* Nombre de la empresa */}
+                <h1
+                    className="text-4xl font-bold text-turquoise"
                     style={{ fontFamily: "'Playfair Display', serif", letterSpacing: '1px' }}
                 >
-                    EXCLUSIVE
+                    MORA
+                </h1>
+
+                <h2
+                    className="text-3xl font-semibold text-darkGray mt-1"
+                    style={{ fontFamily: "'Playfair Display', serif", letterSpacing: '1px' }}
+                >
+                    UNIFORMES
                 </h2>
 
                 <p
-                    className="text-xs text-gray-600 tracking-widest"
+                    className="text-sm text-grayCustom mt-2 tracking-widest"
                     style={{ fontFamily: "'Playfair Display', serif" }}
                 >
-                    Oruro · Bolivia
+                    Concepcion · Chile
                 </p>
             </div>
 
-            <Link href="/" className="text-black hover:text-gray-700 transition-colors">
+            {/* Icono de Home */}
+            <Link
+                href="/"
+                className="text-turquoise hover:text-darkTurquoise transition-colors"
+            >
                 <Home size={28} />
             </Link>
         </div>

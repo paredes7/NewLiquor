@@ -15,12 +15,17 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
-                playfair: ["Playfair Display", "serif"],
-                poppins: ["Poppins", "sans-serif"],
+                playfair: ['Playfair Display', 'serif'],
+                poppins: ['Poppins', 'sans-serif'],
             },
+
             colors: {
-                brandBlack: '#000000',
-                brandGold: '#C9A761',
+
+                /* Paleta Jhaseft */
+                darkGray: '#231f20',      // Gris oscuro
+                grayCustom: '#939191',    // Gris
+                turquoise: '#01a387',     // Turquesa vivido
+                darkTurquoise: '#165a4e', // Turquesa oscuro
             },
         },
     },

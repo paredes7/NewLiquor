@@ -6,5 +6,5 @@
     <li>{{ $item->product->name }} - Cantidad: {{ $item->quantity }}</li>
 @endforeach
 </ul>
-<p>Total pagado: Bs{{ number_format($order->total, 2) }}</p>
+<p>Total pagado: ${{ number_format($order->total, 2) }}</p>
 <p>¡Esperamos verte pronto nuevamente!</p>

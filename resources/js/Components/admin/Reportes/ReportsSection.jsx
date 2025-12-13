@@ -144,7 +144,7 @@ const exportFileprod = (type) => {
       <div className="w-full max-w-6xl">
         <h2 className="text-3xl font-bold text-gray-800 mb-6">Reportes de Ventas </h2>
 
-        {/* TABS */}
+        
         <div className="flex gap-3 mb-6">
           {["diario", "semanal", "mensual", "anual"].map((t) => (
             <button
@@ -430,7 +430,7 @@ const exportFileprod = (type) => {
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Total vendido</span>
-                <span className="font-semibold">Bs {formatMoney(totales.total_vendido)}</span>
+                <span className="font-semibold">$ {formatMoney(totales.total_vendido)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Ítems vendidos</span>
@@ -453,7 +453,7 @@ const exportFileprod = (type) => {
                       <div className="font-semibold">{p.producto ?? p.name}</div>
                       <div className="text-sm text-gray-500">{p.cantidad_total ?? p.quantity ?? 0} unidades</div>
                     </div>
-                    <div className="text-sm font-semibold">Bs {formatMoney(p.total_generado ?? p.total ?? 0)}</div>
+                    <div className="text-sm font-semibold">$ {formatMoney(p.total_generado ?? p.total ?? 0)}</div>
                   </li>
                 ))}
               </ul>
@@ -475,7 +475,7 @@ const exportFileprod = (type) => {
                   <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Pedido</th>
                   <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Producto</th>
                   <th className="px-4 py-2 text-right text-sm font-medium text-gray-600">Cantidad</th>
-                  <th className="px-4 py-2 text-right text-sm font-medium text-gray-600">Subtotal (Bs)</th>
+                  <th className="px-4 py-2 text-right text-sm font-medium text-gray-600">Subtotal ($)</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y">
@@ -492,7 +492,7 @@ const exportFileprod = (type) => {
                     <td className="px-4 py-3 text-sm text-gray-700">{d.pedido ?? d.order_id ?? d.id}</td>
                     <td className="px-4 py-3 text-sm text-gray-700">{d.producto ?? d.name ?? "-"}</td>
                     <td className="px-4 py-3 text-sm text-right text-gray-700">{d.cantidad ?? d.quantity ?? 0}</td>
-                    <td className="px-4 py-3 text-sm text-right text-gray-700">Bs {formatMoney(d.subtotal ?? d.total ?? 0)}</td>
+                    <td className="px-4 py-3 text-sm text-right text-gray-700">$ {formatMoney(d.subtotal ?? d.total ?? 0)}</td>
                   </tr>
                 ))}
               </tbody>

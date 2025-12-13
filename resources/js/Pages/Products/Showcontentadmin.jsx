@@ -87,7 +87,7 @@ export default function ShowProduct({ product }) {
 
             <div className="space-y-6" style={{ fontFamily: "'Playfair Display', serif" }}>
                 <h1 className="text-4xl font-extrabold uppercase">{product.name}</h1>
-                <p className="text-3xl font-bold text-gray-900">Bs {Number(product.price).toFixed(2)}</p>
+                <p className="text-3xl font-bold text-gray-900">$ {Number(product.price).toFixed(2)}</p>
                 {selectedVariant && (
                     <p className="text-md text-gray-600 font-semibold">
                         <span className="font-bold text-black">{selectedVariant.sku}</span>

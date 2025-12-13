@@ -1,8 +1,8 @@
 @component('mail::message')
 {{-- Logo --}}
-<img src="{{ asset('https://res.cloudinary.com/dnbklbswg/image/upload/v1765267450/exclusive-removebg-preview_x68ft5.png') }}" alt="Exclusive" style="width:150px; margin-bottom:20px;">
+<img src="{{ asset('https://res.cloudinary.com/dnbklbswg/image/upload/v1765627552/Captura_de_pantalla_2025-12-13_075927-removebg-preview_m4lqsz.png') }}" alt="mora" style="width:150px; margin-bottom:20px;">
 
-# Gracias por comprar en Exclusive, {{ $order->customer_name }}!
+# Gracias por comprar en Mora, {{ $order->customer_name }}!
 
 A continuación el resumen de tu pedido:
 
@@ -11,8 +11,8 @@ A continuación el resumen de tu pedido:
         <tr>
             <th style="border-bottom:1px solid #ddd; text-align:left; padding:8px;">Producto</th>
             <th style="border-bottom:1px solid #ddd; text-align:center; padding:8px;">Cantidad</th>
-            <th style="border-bottom:1px solid #ddd; text-align:right; padding:8px;">Precio (Bs)</th>
-            <th style="border-bottom:1px solid #ddd; text-align:right; padding:8px;">Subtotal (Bs)</th>
+            <th style="border-bottom:1px solid #ddd; text-align:right; padding:8px;">Precio ($)</th>
+            <th style="border-bottom:1px solid #ddd; text-align:right; padding:8px;">Subtotal ($)</th>
         </tr>
     </thead>
     <tbody>
@@ -28,7 +28,7 @@ A continuación el resumen de tu pedido:
     <tfoot>
         <tr>
             <td colspan="3" style="padding:8px; text-align:right; font-weight:bold;">Total:</td>
-            <td style="padding:8px; text-align:right; font-weight:bold;">{{ number_format($order->total, 2) }} Bs</td>
+            <td style="padding:8px; text-align:right; font-weight:bold;">{{ number_format($order->total, 2) }} $</td>
         </tr>
     </tfoot>
 </table>
@@ -38,6 +38,6 @@ A continuación el resumen de tu pedido:
 - Por favor envía tu comprobante de pago al correo o WhatsApp del vendedor.  
 - Tu pedido será procesado pronto y recibirás notificación del envío.
 
-Gracias por confiar en Exclusive.
+Gracias por confiar en Mora.
 
 @endcomponent
