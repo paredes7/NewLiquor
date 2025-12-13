@@ -20,7 +20,7 @@ export default function Products({ categories: initialCategories = [], search: i
       const nextOffset = categories.length;
 
       const params = new URLSearchParams({ offset: nextOffset });
-      const response = await fetch(`/admin/ventas/json?${params.toString()}`, {
+      const response = await fetch(`/ventas/json?${params.toString()}`, {
         headers: { 'X-CSRF-TOKEN': token },
       });
 

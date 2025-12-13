@@ -27,7 +27,9 @@ Route::get('/Contacto', function () {
 //para clientes 
 Route::get('/products/{slug}/{product}', [ProductController::class, 'show'])
     ->name('products.show');
-    
+   
+Route::get('/ventas/json', [ProductController::class, 'getCategoriasJson'])->name('admin.ventas.json');    
+
 Route::prefix('carrito')->group(function () {
     Route::get('/data', [CartController::class, 'data'])->name('carrito.data');
     Route::post('/add', [CartController::class, 'add'])->name('carrito.add');
