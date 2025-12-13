@@ -33,7 +33,7 @@ export default function CartModal({ isOpen, onClose }) {
           ${show ? 'translate-x-0' : 'translate-x-full'}
         `}
       >
-        {/* Cerrar modal */}
+        
         <button
           className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 transition"
           onClick={onClose}
@@ -41,8 +41,8 @@ export default function CartModal({ isOpen, onClose }) {
           <X size={24} />
         </button>
 
-        {/* Título + Vaciar carrito */}
-        <div className="flex justify-between items-center mb-4">
+      
+        <div className="flex gap-12 items-center mb-4">
           <h2 className="text-2xl font-bold">Mi Carrito</h2>
           {cart.length > 0 && (
             <button
@@ -55,7 +55,7 @@ export default function CartModal({ isOpen, onClose }) {
           )}
         </div>
 
-        {/* Productos */}
+        
         <div className="flex-1 overflow-y-auto space-y-4">
           {cart.length === 0 ? (
             <p className="text-gray-500 text-center mt-10">El carrito está vacío</p>
@@ -69,7 +69,7 @@ export default function CartModal({ isOpen, onClose }) {
                 />
                 <div className="flex-1 flex flex-col justify-between h-full">
                   <p className="font-semibold truncate">{item.name}</p>
-                  {/* Mostrar variante y SKU */}
+                
                   {item.options.variant && (
                     <p className="text-sm text-gray-500">{item.options.variant}</p>
                   )}
@@ -109,7 +109,7 @@ export default function CartModal({ isOpen, onClose }) {
           )}
         </div>
 
-        {/* Totales */}
+       
         {cart.length > 0 && (
           <div className="mt-4 border-t border-gray-300 pt-4 flex flex-col gap-4">
             <p className="flex justify-between font-bold text-lg">
@@ -117,7 +117,7 @@ export default function CartModal({ isOpen, onClose }) {
               <span>Bs {total.toFixed(2)}</span>
             </p>
 
-            {/* Botón Confirmar */}
+           
             <Link
               href="/checkout"
               className="block w-full py-3 text-center bg-black text-white font-bold rounded-xl hover:bg-gray-800 transition"
