@@ -38,12 +38,12 @@ export default function Layout({ title, auth, children }) {
         <a
   href="https://wa.me/69791784"
   target="_blank"
-  className="fixed bottom-6 right-6 w-20 h-20 rounded-full bg-[#25D366] shadow-xl flex items-center justify-center hover:bg-[#1ebe57] transition z-[1000]"
+  className="fixed bottom-6 right-6 w-16 h-16 rounded-full bg-[#25D366] shadow-xl flex items-center justify-center hover:bg-[#1ebe57] transition z-[1000]"
 >
   <img
     src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
     alt="WhatsApp"
-    className="w-12 h-12"
+    className="w-10 h-10"
   />
 </a>
       </div>

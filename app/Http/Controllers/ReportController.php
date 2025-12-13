@@ -8,7 +8,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ReporteVentasExport;
 use Barryvdh\DomPDF\Facade\Pdf; // Nota: PDF → Pdf con P mayúscula
  
-
+ 
 class ReportController extends Controller
 {
     public function ventas(Request $request)
@@ -115,4 +115,54 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('reportes.ventas-pdf', $data);
         return $pdf->download('reporte_ventas.pdf');
     }
+
+
+
+    public function productos()
+{
+    $productos = DB::table('order_items as oi')
+        ->join('products as p', 'p.id', '=', 'oi.product_id')
+        ->select(
+            'p.name as producto',
+            DB::raw('SUM(oi.quantity) as cantidad_total'),
+            DB::raw('SUM(oi.subtotal) as total_generado')
+        )
+        ->groupBy('p.name')
+        ->orderByDesc('total_generado')
+        ->get();
+
+    return response()->json([
+        'status' => 'success',
+        'productos' => $productos
+    ]);
+}
+
+/* ================= EXPORTADORES PRODUCTOS ================= */
+
+public function exportExcelProductos()
+{
+    return Excel::download(
+        new \App\Exports\ReporteProductosExport(),
+        'reporte_productos.xlsx'
+    );
+}
+
+public function exportCsvProductos()
+{
+    return Excel::download(
+        new \App\Exports\ReporteProductosExport(),
+        'reporte_productos.csv'
+    );
+}
+
+public function exportPdfProductos()
+{
+    // Cargar productos con sus variantes y los atributos de cada variante
+    $productos = \App\Models\Product::with(['variants.values.attribute'])->get();
+
+    $pdf = Pdf::loadView('reportes.productos-pdf', compact('productos'));
+    return $pdf->download('reporte_productos.pdf');
+}
+
+
 }

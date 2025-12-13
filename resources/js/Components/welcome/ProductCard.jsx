@@ -1,9 +1,9 @@
 import { Link } from "@inertiajs/react";
 
-export default function ProductCard({ product }) {
+export default function ProductCard ({ product }) {
   const totalStock = product.variants?.reduce((sum, v) => sum + v.stock, 0) || 0;
   const isOutOfStock = totalStock === 0;
-  const imageUrl = product.image || "https://via.placeholder.com/600x800";
+  const imageUrl = product.multimedia?.[0]?.url || "https://via.placeholder.com/600x800";
 
   return ( 
     <Link

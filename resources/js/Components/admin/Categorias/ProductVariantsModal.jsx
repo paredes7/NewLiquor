@@ -10,13 +10,21 @@ export default function ProductVariantsModal({ product, onClose }) {
   const [variantToEdit, setVariantToEdit] = useState(null);
 
   useEffect(() => {
-    fetch(`/admin/products/${product.id}/attributes`)
-      .then(res => res.json())
-      .then(data => {
-        setAttributes(data.attributes);
-        setVariants(data.variants);
-      });
-  }, [product]);
+  if (!product?.id) return;
+
+  fetch(`/admin/products/${product.id}/attributes`, {
+    credentials: 'include'
+  })
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      setAttributes(data.attributes);
+      setVariants(data.variants);
+    })
+    .catch(err => console.error(err));
+}, [product]);
 
   const handleDeleteVariant = async (variantId) => {
     if (!confirm("¿Eliminar variante?")) return;

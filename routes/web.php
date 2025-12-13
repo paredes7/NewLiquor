@@ -11,25 +11,20 @@ use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminControllerDashboard;
 use App\Http\Controllers\AdminCategoryProductsController;
 use App\Http\Controllers\AdminProductVariantsController;
+use App\Http\Controllers\StockController;
 use App\Http\Controllers\VentasController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReportController;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'flash' => [
-            'success' => session('success'),
-            'error' => session('error'),
-        ],
-    ]);
-})->name('welcome');
 
+Route::get('/', [ProductController::class, 'index'])->name('welcome');
 
-Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+Route::get('/Contacto', function () {
+        return Inertia::render('Contacto');
+    })->name('contacto');
 
+//para clientes 
 Route::get('/products/{slug}/{product}', [ProductController::class, 'show'])
     ->name('products.show');
     
@@ -60,6 +55,10 @@ Route::prefix('admin')->group(function () {
 
         Route::get('/dashboard', [AdminControllerDashboard::class, 'index']);
 
+
+        Route::get('/ventas/json', [VentasController::class, 'getCategoriasJson'])->name('admin.ventas.json');
+        Route::get('/ventas/search-sku', [VentasController::class, 'searchBySku']);
+
         // Categorías
         Route::get('/categories/paginate', [AdminControllerDashboard::class, 'paginateCategories']);
         Route::post('/categories',          [AdminControllerDashboard::class, 'storeCategory']);
@@ -73,15 +72,21 @@ Route::prefix('admin')->group(function () {
     Route::delete('/products/{product}', [AdminCategoryProductsController::class, 'destroy']);
 
 
-Route::get('/Ventas', [VentasController::class, 'index'])->name('admin.ventas');
+Route::post('/descontar-stock', [StockController::class, 'descontar'])
+    ->name('admin.stock.descontar');
 
-Route::get('/products/{slug}/{product}', [VentasController::class, 'show'])
-    ->name('products.show');
+Route::get('/Ventas', [VentasController::class, 'index'])->name('admin.ventas');
 
 // Obtener atributos y variantes de un producto
 Route::get('/products/{product}/attributes', [AdminProductVariantsController::class, 'getAttributes'])
     ->name('admin.products.attributes');
 
+//para redirigr a prodcutos de cada card que hay
+Route::get('/products/{slug}/{product}', [VentasController::class, 'show'])
+    ->name('products.show.admin');
+
+
+ 
 // Crear nuevas variantes (POST)
 Route::post('/products/{product}/variants', [AdminProductVariantsController::class, 'store'])
     ->name('admin.products.variants.store');
@@ -104,10 +109,19 @@ Route::get('/orders/meta', [OrderController::class, 'meta']);
     Route::delete('/orders/{order}', [OrderController::class, 'destroy']);
     
     // Reportes de ventas
+
+//reporte de prodcutso  
+Route::get('/productos/pdf', [ReportController::class, 'exportPdfProductos']);
+
 Route::get('/reportes', [ReportController::class, 'ventas']);
 Route::get('/reportes/excel', [ReportController::class, 'exportExcel']);
 Route::get('/reportes/csv', [ReportController::class, 'exportCsv']);
 Route::get('/reportes/pdf', [ReportController::class, 'exportPdf']);
+
+
+
+
+
 
     });
 });

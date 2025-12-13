@@ -62,7 +62,7 @@ export default function CheckoutPageContent() {
         messageLines.push('', `*Total: $${total}*`);
 
         const whatsappMessage = encodeURIComponent(messageLines.join('\n'));
-        const whatsappNumber = "59165359695";
+        const whatsappNumber = "59169791784";
         const whatsappURL = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
         // Abrir WhatsApp en nueva pestaña primero

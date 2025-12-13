@@ -32,7 +32,7 @@ export default function Header({ auth }) {
           {/* NAV */}
           <nav className="flex md:text-xl md:gap-10 text-xs gap-1 font-medium">
             <Link
-              href="/contacto"
+              href="/Contacto"
               className="relative text-xl font-semibold text-black transition duration-300 
              hover:text-gray-800
              after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-0 

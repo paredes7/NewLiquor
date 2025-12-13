@@ -83,6 +83,18 @@ export default function ReportsSection() {
     }
   };
 
+const exportFileprod = (type) => {
+  const url = `/admin/${type === "excel" ? "productos/excel" : type === "csv" ? "productos/csv" : "productos/pdf"}`;
+
+  if (type === "pdf") {
+    window.open(url, "_blank");
+  } else {
+    window.location.href = url;
+  }
+};
+
+
+
   // Helpers para leer respuesta con tolerancia a distintos formatos
   const getTotales = () => {
     if (!reporte) return { total_pedidos: 0, total_vendido: 0, total_items_vendidos: 0 };
@@ -395,6 +407,13 @@ export default function ReportsSection() {
               onClick={() => exportFile("pdf")}
             >
               Ver / Exportar PDF
+            </button>
+
+            <button
+              className="px-4 py-2 rounded bg-white border text-gray-700 hover:bg-gray-50"
+              onClick={() => exportFileprod("pdf")}
+            >
+              Ver / Exportar PDF de productos
             </button>
           </div>
         </div>

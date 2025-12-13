@@ -21,7 +21,7 @@ export default function ShowProduct({ product }) {
     const imageUrl = product.image || "https://via.placeholder.com/600x400";
     const stock = selectedVariant?.stock || 0;
     const isOutOfStock = stock === 0;
-    const currentUrl = window.location.href;
+
 
     const selectedAttribute = selectedVariant?.values[0]?.attribute || "Variante";
     const selectedValue = selectedVariant?.values[0]?.value || "";
@@ -88,7 +88,6 @@ export default function ShowProduct({ product }) {
             <div className="space-y-6" style={{ fontFamily: "'Playfair Display', serif" }}>
                 <h1 className="text-4xl font-extrabold uppercase">{product.name}</h1>
                 <p className="text-3xl font-bold text-gray-900">Bs {Number(product.price).toFixed(2)}</p>
-                <p>admiiiin</p>
                 {selectedVariant && (
                     <p className="text-md text-gray-600 font-semibold">
                         <span className="font-bold text-black">{selectedVariant.sku}</span>

@@ -1,12 +1,48 @@
 import { X, Minus, Plus, Trash2 } from 'lucide-react';
 import { useCart } from '@/Contexts/CartContext';
-import { Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import { router } from '@inertiajs/react';
+
 
 export default function CartModaladmin({ isOpen, onClose }) {
   const { cart, total, removeFromCart, updateQuantity, clearCart } = useCart();
   const [visible, setVisible] = useState(false);
   const [show, setShow] = useState(false);
+
+
+  const descontarStock = async () => {
+  try {
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    const response = await fetch(route('admin.stock.descontar'), {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': token
+      },
+      body: JSON.stringify({
+        items: cart.map(item => ({ sku: item.options.sku, qty: item.qty }))
+      })
+    });
+    
+    const data = await response.json();
+
+    if (data.success) {
+      alert(data.message); // O un toast bonito
+      clearCart();
+      onClose();
+    } else {
+      alert(data.message || 'Error desconocido');
+    }
+
+  } catch (err) {
+    alert('Error en la conexión');
+    console.error(err);
+  }
+};
+
+
+
 
   useEffect(() => {
     if (isOpen) {
@@ -33,7 +69,7 @@ export default function CartModaladmin({ isOpen, onClose }) {
           ${show ? 'translate-x-0' : 'translate-x-full'}
         `}
       >
-      
+
         <button
           className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 transition"
           onClick={onClose}
@@ -41,21 +77,21 @@ export default function CartModaladmin({ isOpen, onClose }) {
           <X size={24} />
         </button>
 
-        
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">Mi Carrito</h2>
+
+        <div className="flex justify-between items-center mb-4 mr-16">
+          <h2 className="text-2xl font-bold">Admin</h2>
           {cart.length > 0 && (
             <button
               onClick={clearCart}
               className="flex items-center text-gray-600 hover:text-gray-800 transition"
             >
               <Trash2 size={18} className="mr-1" />
-              Vaciarsasa
+              Vaciar
             </button>
           )}
         </div>
 
-        
+
         <div className="flex-1 overflow-y-auto space-y-4">
           {cart.length === 0 ? (
             <p className="text-gray-500 text-center mt-10">El carrito está vacío</p>
@@ -69,7 +105,7 @@ export default function CartModaladmin({ isOpen, onClose }) {
                 />
                 <div className="flex-1 flex flex-col justify-between h-full">
                   <p className="font-semibold truncate">{item.name}</p>
-                  
+
                   {item.options.variant && (
                     <p className="text-sm text-gray-500">{item.options.variant}</p>
                   )}
@@ -109,7 +145,7 @@ export default function CartModaladmin({ isOpen, onClose }) {
           )}
         </div>
 
-        
+
         {cart.length > 0 && (
           <div className="mt-4 border-t border-gray-300 pt-4 flex flex-col gap-4">
             <p className="flex justify-between font-bold text-lg">
@@ -117,13 +153,13 @@ export default function CartModaladmin({ isOpen, onClose }) {
               <span>Bs {total.toFixed(2)}</span>
             </p>
 
-            
-            <Link
-              href="#"
+
+            <button
+              onClick={descontarStock}
               className="block w-full py-3 text-center bg-black text-white font-bold rounded-xl hover:bg-gray-800 transition"
             >
-              Descontar
-            </Link>
+              Descontar del Stock
+            </button>
           </div>
         )}
       </div>

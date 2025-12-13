@@ -1,22 +1,8 @@
-<?php
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-
-class ProductVariantValue extends Model
+public function exportPdfProductos()
 {
-    protected $fillable = [
-        'variant_id',
-        'attribute_value_id'
-    ];
+    // Cargar productos con sus variantes y los atributos de cada variante
+    $productos = \App\Models\Product::with(['variants.values.attribute'])->get();
 
-    public function variant()
-    {
-        return $this->belongsTo(ProductVariant::class);
-    }
-
-    public function value()
-    {
-        return $this->belongsTo(ProductAttributeValue::class, 'attribute_value_id');
-    }
+    $pdf = Pdf::loadView('reportes.productos-pdf', compact('productos'));
+    return $pdf->download('reporte_productos.pdf');
 }

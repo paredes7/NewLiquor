@@ -2,102 +2,68 @@
 
 namespace App\Http\Controllers;
 
+use Inertia\Inertia; 
+use App\Http\Controllers\Controller;
 use App\Models\Category;
-use Illuminate\Http\Request;
 use App\Models\Product;
-use Inertia\Inertia;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
     public function index(Request $request)
 {
     $search = $request->query('search', '');
-    $categorySlug = $request->query('category', '');
+    $page = 1;
+    $perPage = 4; // mostrar 3 categorías al inicio
 
-    $categoriesQuery = Category::with([
-        'products' => function ($query) use ($search) {
-            $query->where('available', 1)
-                  ->when($search, fn($q) =>
-                       $q->where('name', 'like', "%$search%")
-                         ->orWhere('description', 'like', "%$search%"))
-                  ->with(['variants.values.attribute', 'multimedia']);
-        },
-        'children.products' => function ($query) use ($search) {
-            $query->where('available', 1)
-                  ->when($search, fn($q) =>
-                       $q->where('name', 'like', "%$search%")
-                         ->orWhere('description', 'like', "%$search%"))
-                  ->with(['variants.values.attribute', 'multimedia']);
-        }
-    ]);
+    $allCategories = Category::whereNull('parent_id')
+        ->with(['children', 'children.products', 'products.variants.values.attribute', 'products.multimedia'])
+        ->get()
+        ->map(function ($category) use ($search) {
 
-    if ($categorySlug) {
-        $categoriesQuery->where('slug', $categorySlug);
-    }
+            $categoryProducts = $category->products()
+                ->where('available', 1)
+                ->when($search, fn($q) => $q->where('name', 'like', "%$search%"))
+                ->with(['variants.values.attribute', 'multimedia'])
+                ->get();
 
-    try {
-        $categories = $categoriesQuery
-            ->whereNull('parent_id')
-            ->get()
-            ->map(function ($category) {
+            $children = $category->children->map(function ($child) use ($search) {
+                $childProducts = $child->products()
+                    ->where('available', 1)
+                    ->when($search, fn($q) => $q->where('name', 'like', "%$search%"))
+                    ->with(['variants.values.attribute', 'multimedia'])
+                    ->get();
+
                 return [
-                    'id' => $category->id,
-                    'name' => $category->name,
-                    'products' => $category->products->map(fn($p) => [
-                        'id' => $p->id,
-                        'name' => $p->name,
-                        'description' => $p->description,
-                        'price' => $p->price,
-                        'available' => $p->available,
-                        'image' => $p->multimedia->first()?->url,
-                        'variants' => $p->variants->map(fn($v) => [
-                            'id' => $v->id,
-                            'stock' => $v->stock,
-                            'sku' => $v->sku,
-                            'price' => $v->price,
-                            'values' => $v->values->map(fn($val) => [
-                                'attribute' => $val->attribute->name,
-                                'value' => $val->value
-                            ])
-                        ])
-                    ]),
-                    'children' => $category->children->map(fn($child) => [
-                        'id' => $child->id,
-                        'name' => $child->name,
-                        'products' => $child->products->map(fn($p) => [
-                            'id' => $p->id,
-                            'name' => $p->name,
-                            'description' => $p->description,
-                            'price' => $p->price,
-                            'available' => $p->available,
-                            'image' => $p->multimedia->first()?->url,
-                            'variants' => $p->variants->map(fn($v) => [
-                                'id' => $v->id,
-                                'stock' => $v->stock,
-                                'sku' => $v->sku,
-                                'price' => $v->price,
-                                'values' => $v->values->map(fn($val) => [
-                                    'attribute' => $val->attribute->name,
-                                    'value' => $val->value
-                                ])
-                            ])
-                        ])
-                    ])
+                    'id' => $child->id,
+                    'name' => $child->name,
+                    'products' => $childProducts,
                 ];
             });
 
-        return response()->json($categories);
+            return [
+                'id' => $category->id,
+                'name' => $category->name,
+                'products' => $categoryProducts,
+                'children' => $children,
+            ];
+        });
 
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => 'Error al cargar productos',
-            'message' => $e->getMessage()
-        ], 500);
-    }
+    $categories = $allCategories->forPage($page, $perPage)->values()->all();
+    $hasMore = $allCategories->count() > $perPage;
+
+    return Inertia::render('Welcome', [
+    'auth' => [
+        'user' => auth()->user() ? auth()->user()->only('id','name','email') : null
+    ],
+    'categories' => $categories,
+    'search' => $search,
+    'page' => $page,
+    'hasMore' => $hasMore,
+]);
 }
 
-
-public function show($slug, $id)
+    public function show($slug, $id)
 {
     $product = Product::where('available', 1)
         ->with([
@@ -127,6 +93,54 @@ public function show($slug, $id)
     ]);
 }
 
+public function getCategoriasJson(Request $request)
+{
+    $search = $request->query('search', '');
+    $offset = (int) $request->query('offset', 0); // cuántas categorías ya se mostraron
+    $perPage = 2; // una categoría por “ver más”
+
+    $allCategories = Category::whereNull('parent_id')
+        ->with(['children', 'children.products', 'products.variants.values.attribute', 'products.multimedia'])
+        ->get()
+        ->map(function ($category) use ($search) {
+
+            $categoryProducts = $category->products()
+                ->where('available', 1)
+                ->when($search, fn($q) => $q->where('name', 'like', "%$search%"))
+                ->with(['variants.values.attribute', 'multimedia'])
+                ->get();
+
+            $children = $category->children->map(function ($child) use ($search) {
+                $childProducts = $child->products()
+                    ->where('available', 1)
+                    ->when($search, fn($q) => $q->where('name', 'like', "%$search%"))
+                    ->with(['variants.values.attribute', 'multimedia'])
+                    ->get();
+
+                return [
+                    'id' => $child->id,
+                    'name' => $child->name,
+                    'products' => $childProducts,
+                ];
+            });
+
+            return [
+                'id' => $category->id,
+                'name' => $category->name,
+                'products' => $categoryProducts,
+                'children' => $children,
+            ];
+        });
+
+    // Aquí usamos offset en lugar de page
+    $categories = $allCategories->slice($offset, $perPage)->values()->all();
+    $hasMore = $allCategories->count() > $offset + $perPage;
+
+    return response()->json([
+        'categories' => $categories,
+        'hasMore' => $hasMore,
+    ]);
+}
 
 
 }
