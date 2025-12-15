@@ -40,7 +40,7 @@ export default function ShowProduct({ product }) {
         await addToCart({
             id: product.id,
             nombre: product.name,
-            precio: selectedVariant.price || product.price,
+            precio: selectedVariant.price ,
             cantidad: quantity,
             image: imageUrl,
             sku: selectedVariant.sku,
