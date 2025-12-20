@@ -32,7 +32,7 @@ class PedidosController extends Controller
             'cart.*.sku' => 'required|string|max:100',
             'cart.*.subtotal' => 'required|numeric|min:0',
             'cart.*.name' => 'nullable|string|max:255',
-            'cart.*.type' => 'nullable|string|max:255',
+            'cart.*.size' => 'nullable|string|max:255',
             'status' => 'required|integer',
             'total' => 'required|numeric|min:0',
         ]);
@@ -63,12 +63,11 @@ class PedidosController extends Controller
             }
 
         
-            $cartForMail = [];
+                    $itemsForMail = [];
             foreach ($request->cart as $item) {
-                $cartForMail[] = [
+                $itemsForMail[] = [
                     'name' => $item['name'] ?? 'Producto',
-                    'sku' => $item['sku'],
-                    'type' => $item['type'] ?? '-',
+                    'size' => $item['size'] ?? null, //  TALLA (NO BD)
                     'quantity' => $item['quantity'],
                     'price' => round($item['price'], 2),
                     'subtotal' => round($item['subtotal'], 2),
@@ -76,7 +75,7 @@ class PedidosController extends Controller
             }
  try {
             Mail::to($order->customer_email)
-                ->send(new \App\Mail\OrderConfirmation($order, $orderItems));
+    ->send(new \App\Mail\OrderConfirmation($order, $itemsForMail));
         } catch (\Exception $e) {
             Log::error("Error enviando correo al cliente: " . $e->getMessage());
         } 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Pedido Maro</title>
-</head>
+</head> 
 
 <body style="margin:0; padding:0; background-color:#f2f2f2; font-family:Arial, sans-serif;">
 
@@ -74,20 +74,29 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($items as $item)
+                                                                @foreach($items as $item)
                                 <tr>
                                     <td style="padding:10px; border-bottom:1px solid #3a3637;">
-                                        {{ $item->name ?? $item->product->name }}<br>
-                                        <small style="color:#b0b0b0;">SKU: {{ $item->sku }}</small>
+                                        {{ $item['name'] }}
+
+                                        @if(!empty($item['size']))
+                                            <br>
+                                            <small style="color:#b0b0b0;">
+                                                {{ $item['size'] }}
+                                            </small>
+                                        @endif
                                     </td>
+
                                     <td style="padding:10px; text-align:center; border-bottom:1px solid #3a3637;">
-                                        {{ $item->quantity }}
+                                        {{ $item['quantity'] }}
                                     </td>
+
                                     <td style="padding:10px; text-align:right; border-bottom:1px solid #3a3637;">
-                                        {{ number_format($item->price, 0) }}
+                                        {{ number_format($item['price'], 0) }}
                                     </td>
+
                                     <td style="padding:10px; text-align:right; border-bottom:1px solid #3a3637;">
-                                        {{ number_format($item->subtotal, 0) }}
+                                        {{ number_format($item['subtotal'], 0) }}
                                     </td>
                                 </tr>
                                 @endforeach

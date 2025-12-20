@@ -7,14 +7,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
-
+ 
 class ProductController extends Controller
 {
     public function index(Request $request)
 {
     $search = $request->query('search', '');
     $page = 1;
-    $perPage = 4; // mostrar 3 categorías al inicio
+    $perPage = 8; // mostrar 4 categorías al inicio
 
     $allCategories = Category::whereNull('parent_id')
         ->with(['children', 'children.products', 'products.variants.values.attribute', 'products.multimedia'])
@@ -101,7 +101,7 @@ public function getCategoriasJson(Request $request)
 {
     $search = $request->query('search', '');
     $offset = (int) $request->query('offset', 0); // cuántas categorías ya se mostraron
-    $perPage = 2; // una categoría por “ver más”
+    $perPage = 2; //  cantidad de categoría por “ver más”
 
     $allCategories = Category::whereNull('parent_id')
         ->with(['children', 'children.products', 'products.variants.values.attribute', 'products.multimedia'])

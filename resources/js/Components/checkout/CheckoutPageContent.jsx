@@ -47,7 +47,7 @@ export default function CheckoutPageContent() {
             price: item.price,
             subtotal: item.price * item.qty,
             sku: item.options.sku,
-            size: item.options.size || item.variant || item.options.variant,
+            size: item.options.variant,
         }));
 
         const paymentMethodId = paymentMethod === "qr" ? 1 : 2;
