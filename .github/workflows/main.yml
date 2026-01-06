@@ -8,8 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+ 
     steps:
       - name: Trigger EasyPanel Deploy
         run: |
-          curl -X POST http://206.183.130.17:3000/api/deploy/ba1952c9709ea911495cf0e13daa1715f1b5363ecd6d5895
+          curl -X POST http://206.183.130.17:3000/api/deploy/82d24d86d6fa37b330c08861499b8cad719e5d06ade3cf4a
