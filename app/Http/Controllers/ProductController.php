@@ -45,6 +45,8 @@ class ProductController extends Controller
 
     public function show($slug, $id)
     {
+        // El slug es solo para SEO, no lo usamos para buscar el producto
+        // Esto permite que funcionen tanto URLs antiguas como nuevas
         $product = Product::where('available', 1)
             ->with([
                 'variants.values.attribute',

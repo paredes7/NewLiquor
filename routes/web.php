@@ -26,6 +26,7 @@ Route::get('/Contacto', function () {
 
 //para clientes
 Route::get('/products/{slug}/{product}', [ProductController::class, 'show'])
+    ->where('slug', '.*')  // Acepta cualquier carácter en el slug, incluyendo caracteres especiales
     ->name('products.show');
 
 //para cliente
@@ -103,6 +104,7 @@ Route::get('/products/{product}/attributes', [AdminProductVariantsController::cl
 
 //para redirigr a prodcutos de cada card que hay
 Route::get('/products/{slug}/{product}', [VentasController::class, 'show'])
+    ->where('slug', '.*')  // Acepta cualquier carácter en el slug
     ->name('products.show.admin');
 
 
