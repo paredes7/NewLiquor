@@ -1,88 +1,96 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link} from '@inertiajs/react';
 import { useState, useEffect } from 'react';
+import ParteArriba from './Header/partearriba';
+import NavLink from './Header/Navlink';
 
-export default function Header({ auth }) {
-  const { props } = usePage();
-  const [flashMessage, setFlashMessage] = useState(null);
+export default function Header() {
 
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const NAV_LINKS = [
+    { href: '/', label: 'Nosotros' },
+    { href: '/Productos', label: 'Productos' },
+    { href: '/Post-Venta', label: 'Post-Venta' },
+    { href: '/Financiamiento', label: 'Financiamiento' },
+    { href: '/Sucursales', label: 'Sucursales' },
+    { href: '/Noticias', label: 'Noticias' },
+  ];
   useEffect(() => {
-    if (props?.flash?.success) {
-      setFlashMessage({ type: 'success', message: props.flash.success });
-      setTimeout(() => setFlashMessage(null), 2000);
-    } else if (props?.flash?.error) {
-      setFlashMessage({ type: 'error', message: props.flash.error });
-      setTimeout(() => setFlashMessage(null), 3000);
-    }
-  }, [props]);
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <>
-      <header className="w-full bg-darkGray text-black shadow-lg py-4 border-b-2 border-black">
+      <ParteArriba/>
+       <header
+        className={`w-full animate-blurred-fade-in bg-white shadow-md transition-all duration-300 sticky top-0 z-50 ${
+          isScrolled ? 'py-2' : 'py-4'
+        }`}
+      >
         <div className="container mx-auto flex justify-between items-center px-6">
-
-
-          <Link href="/" className="flex items-center gap-3">
+       
+          <Link href="/" className="flex items-center">
             <img
-              src="https://res.cloudinary.com/dnbklbswg/image/upload/v1765627552/Captura_de_pantalla_2025-12-13_075927-removebg-preview_m4lqsz.png"
-              alt="Logo de la tienda"
-              className="h-20 w-40 md:h-40 md:w-72 object-contain transition-transform duration-300 hover:scale-105 drop-shadow-lg"
+              src="https://res.cloudinary.com/dnbklbswg/image/upload/v1767750866/pragatilogo_cw8xso.jpg"
+              alt="Pragbati | Nibol Logo"
+              className={`transition-all duration-300 object-contain ${
+                isScrolled ? 'h-12 w-32 md:h-14 md:w-40' : 'h-16 w-40 md:h-20 md:w-56'
+              }`}
             />
           </Link>
 
-
-          <nav className="flex md:text-xl md:gap-10 text-xs gap-1 font-medium">
-            <Link
-              href="/Contacto"
-              className="
-      relative
-      text-xl
-      font-semibold
-      text-grayCustom
-      transition-all
-      duration-300
-      hover:text-turquoise
-
-      after:absolute
-      after:left-0
-      after:-bottom-1
-      after:h-[2px]
-      after:w-0
-      after:bg-darkTurquoise
-      after:transition-all
-      after:duration-300
-      hover:after:w-full
-    "
-            >
-              Contacto
-            </Link>
+     
+          <nav className="hidden lg:flex items-center gap-8 font-semibold text-gray-700">
+            {NAV_LINKS.map((link) => (
+              <NavLink key={link.href} href={link.href}>
+                {link.label}
+              </NavLink>
+            ))}
           </nav>
 
+    
+          <button
+            className="lg:hidden text-gray-700 hover:text-black transition-colors"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
+        </div>
+
+       
+        <div
+          className={`lg:hidden overflow-hidden transition-all duration-300 ${
+            mobileMenuOpen ? 'max-h-96 border-t border-gray-200' : 'max-h-0'
+          }`}
+        >
+          <nav className="container mx-auto px-6 py-4 flex flex-col gap-4">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-gray-700 hover:text-black font-semibold transition-colors py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
         </div>
       </header>
-
-
-      {flashMessage && (
-        <div
-          className={`fixed top-20 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-500 
-            ${flashMessage.type === 'success' ? 'bg-black text-white' : 'bg-red-600 text-white'} 
-            px-6 py-4 rounded-lg shadow-xl animate-slideDown`}
-        >
-          {flashMessage.message}
-        </div>
-      )}
-
-      {/* Animación */}
-      <style>
-        {`
-          @keyframes slideDown {
-            0% { opacity: 0; transform: translateY(-20px) translateX(-50%); }
-            100% { opacity: 1; transform: translateY(0) translateX(-50%); }
-          }
-          .animate-slideDown {
-            animation: slideDown 0.5s ease-out forwards;
-          }
-        `}
-      </style>
     </>
   );
 }

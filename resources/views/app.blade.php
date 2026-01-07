@@ -9,15 +9,15 @@
     <title inertia>{{ config('app.name', 'Maro Uniformes') }}</title>
 
     <!-- Favicon -->
-    <link rel="icon" href="https://res.cloudinary.com/dnbklbswg/image/upload/v1765634166/Captura_de_pantalla_2025-12-13_075927_sujhuc.png" type="image/png">
+    <link rel="icon" href="https://res.cloudinary.com/dnbklbswg/image/upload/v1767750866/pragatilogo_cw8xso.jpg">
 
     <!-- Fuente principal -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://res.cloudinary.com/dnbklbswg/image/upload/v1767750866/pragatilogo_cw8xso.jpg" rel="stylesheet">
 
     <!-- Meta Open Graph para redes sociales -->
     <meta property="og:title" content="Maro Uniformes" />
     <meta property="og:description" content="Uniformes de calidad en Concepción, Chile" />
-    <meta property="og:image" content="https://res.cloudinary.com/dnbklbswg/image/upload/v1765634166/Captura_de_pantalla_2025-12-13_075927_sujhuc.png" />
+    <meta property="og:image" content="https://res.cloudinary.com/dnbklbswg/image/upload/v1767750866/pragatilogo_cw8xso.jpg" />
     <meta property="og:url" content="{{ url('/') }}" />
     <meta property="og:type" content="website" />
 
@@ -25,7 +25,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Maro Uniformes" />
     <meta name="twitter:description" content="Ofrecemos uniformes de calidad en Concepción, Chile" />
-    <meta name="twitter:image" content="https://res.cloudinary.com/dnbklbswg/image/upload/v1765634166/Captura_de_pantalla_2025-12-13_075927_sujhuc.png" />
+    <meta name="twitter:image" content="https://res.cloudinary.com/dnbklbswg/image/upload/v1767750866/pragatilogo_cw8xso.jpg" />
 
     <!-- Fuentes -->
     <link rel="preconnect" href="https://fonts.bunny.net">

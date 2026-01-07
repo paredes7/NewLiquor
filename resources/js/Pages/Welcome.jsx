@@ -1,16 +1,23 @@
-import Products from '@/Components/welcome/Products';
 import Layout from '@/Layouts/MainLayout';
-import Videos from '@/Components/welcome/Videos';
-export default function Welcome({ auth, categories, search, page, hasMore }) {
+import Banner from '@/Components/welcome/WelcomeSe/Banner';
+import WelcomeSection from '@/Components/welcome/WelcomeSe/WelcomeSection';
+import CategoriesGrid from '@/Components/welcome/WelcomeSe/CategoriesGrid';
+import CTAContact from '@/Components/welcome/WelcomeSe/CTAContact';
 
-    return (
-            <Layout title="Maro|Inicio" auth={auth}>
-                <Products
-                    categories={categories} 
-                    search={search} 
-                    page={page} 
-                    hasMore={hasMore}  
-                />
-            </Layout>
-        );
+export default function Welcome({ categories, search, page, hasMore }) {
+  
+  return (
+    <Layout title="Pragati Motors | Bolivia">
+      
+      <Banner img="https://res.cloudinary.com/dnbklbswg/image/upload/v1767755747/banner_yfcfdc.jpg" />
+      
+      
+      <WelcomeSection />
+      
+      <CategoriesGrid categories={categories} hasMore={hasMore} />
+      
+      
+      <CTAContact />
+    </Layout>
+  );
 }

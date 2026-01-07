@@ -16,7 +16,7 @@ use App\Http\Controllers\VentasController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReportController;
 use Inertia\Inertia;
-
+ 
 
 Route::get('/', [ProductController::class, 'index'])->name('welcome');
 
@@ -27,6 +27,9 @@ Route::get('/Contacto', function () {
 //para clientes 
 Route::get('/products/{slug}/{product}', [ProductController::class, 'show'])
     ->name('products.show');
+
+//para cliente
+Route::get('/products/{slug}', [ProductController::class, 'getCategoryDetails'])->name('products.categoria');
    
 Route::get('/ventas/json', [ProductController::class, 'getCategoriasJson'])->name('admin.ventas.json');    
 
