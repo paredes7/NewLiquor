@@ -1,13 +1,14 @@
 import { Link } from "@inertiajs/react";
+import { slugify } from "../../utils/slugify";
 
 export default function ProductCardadmin({ product }) {
   const totalStock = product.variants?.reduce((sum, v) => sum + v.stock, 0) || 0;
   const isOutOfStock = totalStock === 0;
   const imageUrl = product.multimedia?.[0]?.url || "https://via.placeholder.com/600x800";
 
-  return ( 
+  return (
     <Link
-      href={`/admin/products/${product.name.replace(/\s+/g, '-').toLowerCase()}/${product.id}`}
+      href={`/admin/products/${slugify(product.name)}/${product.id}`}
       className={`w-full h-full relative overflow-hidden rounded-3xl shadow-xl border
         ${isOutOfStock ? "border-black opacity-80" : "border-gray-200"}
         bg-white text-black hover:scale-105 hover:shadow-2xl transition-all duration-500`}

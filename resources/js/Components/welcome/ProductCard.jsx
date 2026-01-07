@@ -1,7 +1,8 @@
 import { Link } from "@inertiajs/react";
+import { slugify } from "../../utils/slugify";
 
 export default function ProductCard({ product }) {
-  
+
   const totalStock =
     product.variants?.reduce((sum, v) => sum + v.stock, 0) || 0;
 
@@ -13,7 +14,7 @@ export default function ProductCard({ product }) {
 
   return (
     <Link
-      href={`/products/${product.name.replace(/\s+/g, '-').toLowerCase()}/${product.id}`}
+      href={`/products/${slugify(product.name)}/${product.id}`}
       className={`
         w-full
         h-full
