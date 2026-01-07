@@ -16,7 +16,7 @@ use App\Http\Controllers\VentasController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReportController;
 use Inertia\Inertia;
-
+ 
 
 Route::get('/', [ProductController::class, 'index'])->name('welcome');
 
@@ -28,66 +28,8 @@ Route::get('/Contacto', function () {
 Route::get('/products/{slug}/{product}', [ProductController::class, 'show'])
     ->name('products.show');
 
-// RUTA TEMPORAL PARA PROBAR EL DISEÑO - ELIMINAR DESPUÉS
-Route::get('/test-vehicle-design', function () {
-    return Inertia::render('Products/ShowVehicle', [
-        'product' => [
-            'id' => 1,
-            'name' => 'Aumark S | 3 Ton Furgón',
-            'description' => 'El Aumark S es el mejor compañero para tu negocio. Ideal para el trabajo en la ciudad, o para largas jornadas de trabajo en carretera. Su diseño y tecnología están especialmente pensados para maximizar el desempeño en las rutas para un eficiente funcionamiento en el transporte.',
-            'price' => 15000000,
-            'multimedia' => [
-                ['id' => 1, 'url' => 'https://via.placeholder.com/800x600/01a387/ffffff?text=Vista+Principal', 'type' => 'image'],
-                ['id' => 2, 'url' => 'https://via.placeholder.com/800x600/165a4e/ffffff?text=Vista+Lateral', 'type' => 'image'],
-                ['id' => 3, 'url' => 'https://via.placeholder.com/800x600/231f20/ffffff?text=Vista+Frontal', 'type' => 'image'],
-                ['id' => 4, 'url' => 'https://via.placeholder.com/800x600/939191/ffffff?text=Vista+Trasera', 'type' => 'image'],
-                ['id' => 5, 'url' => 'https://via.placeholder.com/800x600/01a387/ffffff?text=Interior', 'type' => 'image'],
-            ],
-            'variants' => [
-                [
-                    'id' => 1,
-                    'sku' => 'AUM-S-3T-STD',
-                    'price' => 15000000,
-                    'stock' => 5,
-                    'values' => [
-                        ['attribute' => 'Versión', 'value' => 'Estándar']
-                    ]
-                ],
-                [
-                    'id' => 2,
-                    'sku' => 'AUM-S-3T-DLX',
-                    'price' => 17500000,
-                    'stock' => 3,
-                    'values' => [
-                        ['attribute' => 'Versión', 'value' => 'Deluxe']
-                    ]
-                ],
-                [
-                    'id' => 3,
-                    'sku' => 'AUM-S-3T-PREM',
-                    'price' => 19000000,
-                    'stock' => 2,
-                    'values' => [
-                        ['attribute' => 'Versión', 'value' => 'Premium']
-                    ]
-                ],
-            ],
-            'specifications' => [
-                'motor' => '2TZH',
-                'potencia' => '155hp / 240Nm',
-                'combustible' => 'Gasolina',
-                'transmision' => 'Manual 5G32',
-                'cabina' => 'Extendida con AC y Calefacción',
-                'capacidad_carga' => '3,000 Kgs.'
-            ],
-            'colors' => [
-                ['name' => 'Blanco', 'hex' => '#FFFFFF'],
-                ['name' => 'Amarillo', 'hex' => '#FFD700'],
-                ['name' => 'Rojo', 'hex' => '#DC143C']
-            ],
-        ]
-    ]);
-});
+//para cliente
+Route::get('/products/{slug}', [ProductController::class, 'getCategoryDetails'])->name('products.categoria');
    
 Route::get('/ventas/json', [ProductController::class, 'getCategoriasJson'])->name('admin.ventas.json');    
 

@@ -10,6 +10,7 @@ class Product extends Model
         'category_id',
         'name',
         'description',
+        'longDescription',
         'available',
         'motor',
         'potencia',
@@ -19,7 +20,7 @@ class Product extends Model
 
     protected $casts = [
         'available' => 'boolean',
-        'peso' => 'decimal:2'
+        // 'peso' => 'decimal:2' // Comentado porque peso puede contener texto
     ];
 
     public function category()

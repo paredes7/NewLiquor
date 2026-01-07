@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class MultimediaType extends Model
 {
+    // Especificar el nombre correcto de la tabla
+    protected $table = 'multimedia_type';
+
     protected $fillable = [
         'name',
         'is_empty'
