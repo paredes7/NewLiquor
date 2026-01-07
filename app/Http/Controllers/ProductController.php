@@ -74,7 +74,8 @@ class ProductController extends Controller
         ])
         ->findOrFail($id);
 
-    return Inertia::render('Products/ShowProduct', [
+    // CAMBIADO TEMPORALMENTE A ShowVehicle para ver el nuevo diseño
+    return Inertia::render('Products/ShowVehicle', [
         'product' => [
             'id' => $product->id,
             'name' => $product->name,
@@ -94,7 +95,23 @@ class ProductController extends Controller
                     'attribute' => $val->attribute->name,
                     'value' => $val->value
                 ])
-            ])
+            ]),
+            // Datos adicionales para VehicleShowcase (OPCIONAL - se usan valores por defecto si no existen)
+            'specifications' => [
+                'motor' => '2TZH',
+                'potencia' => '155hp / 240Nm',
+                'combustible' => 'Gasolina',
+                'transmision' => 'Manual 5G32',
+                'cabina' => 'Extendida con AC',
+                'capacidad_carga' => '3,000 Kgs.'
+            ],
+            'colors' => [
+                ['name' => 'Blanco', 'hex' => '#FFFFFF'],
+                ['name' => 'Amarillo', 'hex' => '#FFD700'],
+                ['name' => 'Rojo', 'hex' => '#DC143C']
+            ],
+            // 'technical_sheet_url' => null, // Opcional: URL del PDF
+            // 'features' => null, // Opcional: se usan placeholders por defecto
         ]
     ]);
 }
