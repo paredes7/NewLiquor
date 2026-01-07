@@ -4,6 +4,7 @@ import EnhancedGallery from "./EnhancedGallery";
 import SpecificationsSection from "./SpecificationsSection";
 import ColorSelector from "./ColorSelector";
 import FeatureHighlights from "./FeatureHighlights";
+import TechnicalSpecificationsTable from "./TechnicalSpecificationsTable";
 
 export default function VehicleShowcase({ product }) {
   const [selectedVariant, setSelectedVariant] = useState(
@@ -106,6 +107,8 @@ export default function VehicleShowcase({ product }) {
 
             {/* Feature Highlights */}
             <FeatureHighlights specifications={specifications} />
+            {/* 2. AQUÍ AÑADIMOS LA TABLA DE CARACTERÍSTICAS TÉCNICAS */}
+            <TechnicalSpecificationsTable specifications={specifications} />
 
             {/* Download Technical Sheet */}
             {product.technical_sheet_url && (
@@ -188,129 +191,6 @@ export default function VehicleShowcase({ product }) {
         </div>
       </div>
 
-      {/* Variant Selection (if applicable) */}
-      {product.variants && product.variants.length > 0 && (
-        <div className="bg-gray-50 py-16">
-          <div className="max-w-7xl mx-auto px-4">
-            <div
-              className="max-w-3xl mx-auto space-y-6"
-              style={{ fontFamily: "'Playfair Display', serif" }}
-            >
-              <h2 className="text-3xl font-bold text-center text-darkGray mb-8">
-                SELECCIONA TU VERSIÓN
-              </h2>
-
-              <p className="text-3xl font-bold text-turquoise text-center">
-                $ {Number(selectedVariant?.price ?? product.price).toFixed(0)}
-              </p>
-
-              {selectedVariant && (
-                <p className="text-md text-grayCustom font-semibold text-center">
-                  SKU:{" "}
-                  <span className="font-bold text-darkGray">
-                    {selectedVariant.sku}
-                  </span>
-                </p>
-              )}
-
-              <div>
-                <h3 className="text-xl font-semibold text-darkGray mb-4">
-                  {selectedAttribute}:
-                </h3>
-                <div className="flex flex-wrap gap-3 justify-center">
-                  {product.variants.map((v) => {
-                    const label = v.values[0]?.value;
-                    return (
-                      <button
-                        key={v.id}
-                        onClick={() => {
-                          setSelectedVariant(v);
-                          setQuantity(1);
-                        }}
-                        disabled={v.stock === 0}
-                        className={`min-w-[80px] px-6 py-3 border-2 rounded-lg text-lg font-bold transition ${
-                          selectedVariant?.id === v.id
-                            ? "bg-turquoise text-darkGray border-turquoise"
-                            : "bg-white text-darkGray border-grayCustom"
-                        } ${
-                          v.stock === 0
-                            ? "opacity-40 cursor-not-allowed"
-                            : "hover:border-darkTurquoise"
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {selectedVariant && (
-                <div className="pt-4">
-                  {isOutOfStock ? (
-                    <p className="text-red-500 font-bold text-lg text-center">
-                      NO DISPONIBLE
-                    </p>
-                  ) : (
-                    <>
-                      <p className="font-semibold text-darkGray text-center">
-                        Stock disponible: {stock}
-                      </p>
-                      <div className="w-full h-2 bg-grayCustom/30 rounded-full mt-2">
-                        <div
-                          className="h-full bg-darkTurquoise rounded-full transition-all"
-                          style={{
-                            width: `${Math.min((stock / 20) * 100, 100)}%`,
-                          }}
-                        ></div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
-
-              {!isOutOfStock && selectedVariant && (
-                <div className="flex items-center justify-center gap-6">
-                  <h3 className="text-lg font-semibold text-darkGray">
-                    Cantidad:
-                  </h3>
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      className="w-12 h-12 border-2 border-grayCustom rounded-full text-2xl hover:border-turquoise transition font-bold"
-                    >
-                      −
-                    </button>
-                    <span className="text-2xl font-bold text-darkGray min-w-[40px] text-center">
-                      {quantity}
-                    </span>
-                    <button
-                      onClick={() =>
-                        setQuantity((q) => (q < stock ? q + 1 : q))
-                      }
-                      className="w-12 h-12 border-2 border-grayCustom rounded-full text-2xl hover:border-turquoise transition font-bold"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              <button
-                disabled={!selectedVariant || isOutOfStock || adding}
-                onClick={handleAddToCart}
-                className={`w-full py-4 rounded-xl text-lg font-bold transition ${
-                  !selectedVariant || isOutOfStock
-                    ? "bg-gray-400 text-white cursor-not-allowed"
-                    : "bg-turquoise text-darkGray hover:bg-darkTurquoise shadow-xl"
-                }`}
-              >
-                {adding ? "Añadiendo..." : success ? "Añadido ✓" : "Añadir al carrito"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -10,8 +10,16 @@ class Product extends Model
         'category_id',
         'name',
         'description',
-        'price',
-        'available'
+        'available',
+        'motor',
+        'potencia',
+        'transmision',
+        'peso'
+    ];
+
+    protected $casts = [
+        'available' => 'boolean',
+        'peso' => 'decimal:2'
     ];
 
     public function category()
@@ -27,5 +35,10 @@ class Product extends Model
     public function multimedia()
     {
         return $this->hasMany(ProductMultimedia::class);
+    }
+
+    public function caracteristicas()
+    {
+        return $this->hasMany(Caracteristica::class);
     }
 }
