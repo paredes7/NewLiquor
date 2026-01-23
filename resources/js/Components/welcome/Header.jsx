@@ -7,14 +7,33 @@ export default function Header() {
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currencyOpen, setCurrencyOpen] = useState(false);
+
+  const [selectedCurrency, setSelectedCurrency] = useState({ 
+    code: 'BO', label: 'Bolivia | BOB', flag: 'bo' 
+  });
+
+  const CURRENCIES = [
+    { code: 'BO', label: 'Bolivia | BOB', flag: 'bo' },
+    { code: 'US', label: 'USA | USD', flag: 'us' },
+    { code: 'CL', label: 'Chile | CLP', flag: 'cl' },
+    { code: 'AR', label: 'Argentina | ARS', flag: 'ar' },
+    { code: 'CO', label: 'Colombia | COP', flag: 'co' },
+    { code: 'EC', label: 'Ecuador | USD', flag: 'ec' },
+    { code: 'VE', label: 'Venezuela | VES', flag: 've' },
+    { code: 'PE', label: 'Perú | PEN', flag: 'pe' },
+    { code: 'UY', label: 'Uruguay | UYU', flag: 'uy' },
+    { code: 'BR', label: 'Brasil | BRL', flag: 'br' },
+  ];
 
   const NAV_LINKS = [
-    { href: '/', label: 'Nosotros' },
-    { href: '/Productos', label: 'Productos' },
-    { href: '/Post-Venta', label: 'Post-Venta' },
-    { href: '/Financiamiento', label: 'Financiamiento' },
-    { href: '/Sucursales', label: 'Sucursales' },
-    { href: '/Noticias', label: 'Noticias' },
+    { href: '/Nuevos', label: 'Nuevos' },
+    { href: '/Ofertas', label: 'Ofertas' },
+    { href: '/Whiksy', label: 'Whiksy' },
+    { href: '/Tequila', label: 'Tequila' },
+    { href: '/Vino', label: 'Vino' },
+    { href: '/Otros licores', label: 'Otros licores' },
+
   ];
   useEffect(() => {
     const handleScroll = () => {
@@ -52,6 +71,78 @@ export default function Header() {
               </NavLink>
             ))}
           </nav>
+
+          {/* Selector de Moneda/País */}
+          <div className="relative w-44 flex justify-end"> 
+            <button 
+              onClick={() => setCurrencyOpen(!currencyOpen)}
+              className="w-full flex items-center justify-between gap-2 text-sm font-medium text-gray-700 hover:text-black transition-colors py-2 px-3 border border-gray-100 rounded-lg hover:bg-gray-50"
+            >
+              <div className="flex items-center gap-2">
+                <img 
+                  src={`https://flagcdn.com/w20/${selectedCurrency.flag}.png`} 
+                  alt={selectedCurrency.code} 
+                  className="w-5 h-auto" 
+                />
+                {/* Usamos whitespace-nowrap para que el texto no salte de línea si es largo */}
+                <span className="whitespace-nowrap">{selectedCurrency.label}</span>
+              </div>
+              
+              <svg className={`w-4 h-4 transition-transform ${currencyOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Menú Desplegable (Dropdown) */}
+            {currencyOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-xl z-[60] py-2 animate-fade-in-down">
+                <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-50 mb-1">
+                  Seleccionar Moneda
+                </div>
+                
+                {/* Mapeo de la lista de monedas */}
+                {CURRENCIES.map((item) => (
+                  <button 
+                    key={item.code}
+                    className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left ${
+                      selectedCurrency.code === item.code ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                    }`}
+                    onClick={() => {
+                      setSelectedCurrency(item); // Actualiza la selección
+                      setCurrencyOpen(false);    // Cierra el menú
+                    }}
+                  >
+                    <img src={`https://flagcdn.com/w20/${item.flag}.png`} alt={item.code} className="w-5 h-auto" />
+                    <span className="text-sm font-semibold">{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+
+          {/* después de cerrar el </nav> de los links,agregando los iconos de user y carrito  */}
+
+          <div className="hidden lg:flex items-center gap-5 text-gray-700">
+            {/* Icono de Usuario */}
+            <Link href="/login" className="hover:text-black transition-colors">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </Link>
+
+            {/* Icono de Carrito */}
+            <Link href="/carrito" className="hover:text-black transition-colors relative">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              {/* Círculo de notificación opcional para el carrito */}
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                0
+              </span>
+            </Link>
+          </div>
+
 
     
           <button
