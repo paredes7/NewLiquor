@@ -1,13 +1,37 @@
-import { Link} from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import ParteArriba from './Header/partearriba';
 import NavLink from './Header/Navlink';
+import MegaMenu from './Header/MegaMenu';
 
 export default function Header() {
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currencyOpen, setCurrencyOpen] = useState(false);
+
+  /** 
+  const { categories, subCategories } = usePage().props;
+
+  const whiskyCategory = categories?.find(cat => cat.slug === 'whisky'); 
+  console.log("Resultado final del Padre whisky:", whiskyCategory);
+
+  const subCategorieWhisky = subCategories?.filter(sub => sub.parent_id ==  whiskyCategory?.id) || [];
+
+  
+  console.log("Subcategorías de la DB:", subCategorieWhisky);
+  
+  const [showWhiskyMenu, setShowWhiskyMenu] = useState(false);
+  */
+
+  const { categories, allSubCategories, otrosLicoresData, NewProducts } = usePage().props;
+  console.log("Categorías que llegan del servidor:", categories);
+  console.log("Subcategorías que llegan del servidor:", allSubCategories);
+  const [activeMenu, setActiveMenu] = useState(null);
+  const getSubCategories = (parentId) => {
+    return allSubCategories?.filter(sub => sub.parent_id == parentId) || [];
+  };
+
 
   const [selectedCurrency, setSelectedCurrency] = useState({ 
     code: 'BO', label: 'Bolivia | BOB', flag: 'bo' 
@@ -29,7 +53,7 @@ export default function Header() {
   const NAV_LINKS = [
     { href: '/Nuevos', label: 'Nuevos' },
     { href: '/Ofertas', label: 'Ofertas' },
-    { href: '/Whiksy', label: 'Whiksy' },
+    { href: '/Whisky', label: 'Whisky' },
     { href: '/Tequila', label: 'Tequila' },
     { href: '/Vino', label: 'Vino' },
     { href: '/Otros licores', label: 'Otros licores' },
@@ -46,6 +70,7 @@ export default function Header() {
   return (
     <>
       <ParteArriba/>
+      
        <header
         className={`w-full animate-blurred-fade-in bg-white shadow-md transition-all duration-300 sticky top-0 z-50 ${
           isScrolled ? 'py-2' : 'py-4'
@@ -65,12 +90,55 @@ export default function Header() {
 
      
           <nav className="hidden lg:flex items-center gap-8 font-semibold text-gray-700">
-            {NAV_LINKS.map((link) => (
-              <NavLink key={link.href} href={link.href}>
-                {link.label}
-              </NavLink>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const isOtros = link.label === 'Otros licores';
+              const isNuevos = link.label === 'Nuevos';
+              // 1. Buscamos el padre normal (Whisky, Tequila, Vino)
+              const currentParent = categories?.find((cat) => {
+                const labelLimpio = link.label.toLowerCase().trim();
+                const slugLimpio = cat.slug.toLowerCase().trim();
+                return slugLimpio === labelLimpio;
+              });
+
+              // 2. Decidimos qué mostrar: 
+              // Si es "Otros", usamos la prop 'otrosLicoresData'. Si no, filtramos hijos normales.
+              const displaySubCategories = isNuevos 
+                ? NewProducts 
+                : (isOtros ? otrosLicoresData : allSubCategories?.filter(sub => sub.parent_id === currentParent?.id) || []);
+
+              return (
+                <div 
+                  key={link.href}
+                  className="relative"
+                  // CAMBIO: Si es Otros, activamos con un string fijo 'otros'
+                  onMouseEnter={() => {
+                    if (isNuevos) setActiveMenu('nuevos');
+                    else if (isOtros) setActiveMenu('otros');
+                    else if (currentParent) setActiveMenu(currentParent.slug);
+                  }}
+                  onMouseLeave={() => setActiveMenu(null)}
+                >
+                  <NavLink href={link.href} className="flex items-center gap-1 py-4">
+                    {link.label}
+                  </NavLink>
+
+                  {/* 3. Renderizado condicional ajustado */}
+                  {activeMenu && (
+                    (isNuevos && activeMenu === 'nuevos') || 
+                    (isOtros && activeMenu === 'otros') || 
+                    (activeMenu === currentParent?.slug)
+                  ) && displaySubCategories.length > 0 && (
+                    <MegaMenu 
+                      parentCategory={isNuevos ? { name: 'Novedades', slug: 'nuevos' } : (isOtros ? { name: 'Otros Licores', slug: 'otros' } : currentParent)} 
+                      subCategories={displaySubCategories} 
+                      type={isNuevos ? 'products' : 'categories'} 
+                    />
+                  )}
+                </div>
+              );
+            })}
           </nav>
+                    
 
           {/* Selector de Moneda/País */}
           <div className="relative w-44 flex justify-end"> 
@@ -182,6 +250,7 @@ export default function Header() {
           </nav>
         </div>
       </header>
+      
     </>
   );
 }
