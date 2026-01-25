@@ -14,6 +14,7 @@ use App\Http\Resources\FeaturedProductResource;
 class ProductController extends Controller
 {
 
+
     /**
      * sirve para obtener los productos destacados y enviarlos a la vista welcome
      * 
@@ -26,6 +27,17 @@ class ProductController extends Controller
             ->with(['product.variants.values.attribute', 'product.multimedia'])
             ->get();
         return FeaturedProductResource::collection($featuredProducts);
+    }
+
+
+    public function search(Request $request) 
+    {
+        $texto = $request->input('search'); // Captura "arroz"
+
+        return Inertia::render('ResultPage', [
+            'search' => $texto,
+            'products' => [] // Por ahora enviamos vacío
+        ]);
     }
 
     public function index(Request $request)

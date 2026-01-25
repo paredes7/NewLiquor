@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory; 
 class Category extends Model
 {
     use HasFactory;
@@ -28,9 +28,9 @@ class Category extends Model
     /**
      * Subcategorías (hijos)
      */
-    public function children()
+    public function children(): HasMany
     {
-        return $this->hasMany(Category::class, 'parent_id');
+        return $this->hasMany(Category::class, 'parent_id', 'id');
     }
 
     /**

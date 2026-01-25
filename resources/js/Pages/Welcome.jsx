@@ -1,3 +1,4 @@
+
 import Layout from "@/Layouts/MainLayout";
 import Banner from "@/Components/welcome/WelcomeSe/Banner";
 import WelcomeSection from "@/Components/welcome/WelcomeSe/WelcomeSection";
@@ -6,6 +7,7 @@ import CTAContact from "@/Components/welcome/WelcomeSe/CTAContact";
 import ProductShopSection from "@/Components/filterProduct/ProductShopSection";
 import Pagination from "@/Components/filterProduct/Paginacion";
 import ProductsCarousel from "@/Components/carruselDestacados/ProductsCarousel";
+import HomeSearch from "@/Components/welcome/WelcomeSe/HomeSearch";
 
 export default function Welcome({
     categories,
@@ -28,6 +30,7 @@ console.log("productos destacados", featuredProducts);
 
     return (
         <Layout title="Pragati Motors | Bolivia">
+             <HomeSearch />
             <Banner img="https://res.cloudinary.com/dnbklbswg/image/upload/v1767755747/banner_yfcfdc.jpg" />
 
             <WelcomeSection />
@@ -49,4 +52,5 @@ console.log("productos destacados", featuredProducts);
             <CTAContact />
         </Layout>
     );
+
 }
