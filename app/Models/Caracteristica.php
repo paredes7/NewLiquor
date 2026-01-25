@@ -8,8 +8,8 @@ class Caracteristica extends Model
 {
     protected $fillable = [
         'product_id',
-        'nombre',
-        'valor'
+        'name',
+        'value',
     ];
 
     public function product()

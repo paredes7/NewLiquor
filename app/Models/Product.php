@@ -9,13 +9,13 @@ class Product extends Model
     protected $fillable = [
         'category_id',
         'name',
+        'alcohol_content',
+        'brand',
+        'price',
+        'volume',
         'description',
         'longDescription',
         'available',
-        'motor',
-        'potencia',
-        'transmision',
-        'peso'
     ];
 
     protected $casts = [
@@ -41,5 +41,11 @@ class Product extends Model
     public function caracteristicas()
     {
         return $this->hasMany(Caracteristica::class);
+    }
+
+    //funcion para relacionar productos destacados
+    public function featuredProduct()
+    {
+        return $this->hasMany(FeaturedProduct::class);
     }
 }

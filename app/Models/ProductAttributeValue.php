@@ -1,6 +1,9 @@
 <?php
+
 namespace App\Models;
 
+use App\Models\ProductAttribute;
+use App\Models\ProductVariant;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductAttributeValue extends Model
