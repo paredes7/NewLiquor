@@ -10,6 +10,15 @@ use Illuminate\Http\Request;
  
 class ProductController extends Controller
 {
+    public function search(Request $request) 
+    {
+        $texto = $request->input('search'); // Captura "arroz"
+
+        return Inertia::render('ResultPage', [
+            'search' => $texto,
+            'products' => [] // Por ahora enviamos vacío
+        ]);
+    }
     public function index(Request $request)
     {
         $search = $request->query('search', '');

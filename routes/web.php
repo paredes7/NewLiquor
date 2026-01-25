@@ -25,6 +25,7 @@ Route::get('/Contacto', function () {
     })->name('contacto');
 
 //para clientes
+Route::get('/buscar', [ProductController::class, 'search'])->name('products.search');
 Route::get('/products/{slug}/{product}', [ProductController::class, 'show'])
     ->where('slug', '.*')  // Acepta cualquier carácter en el slug, incluyendo caracteres especiales
     ->name('products.show');
