@@ -11,6 +11,7 @@ use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminControllerDashboard;
 use App\Http\Controllers\AdminCategoryProductsController;
 use App\Http\Controllers\AdminProductVariantsController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\VentasController;
 use App\Http\Controllers\OrderController;
@@ -35,6 +36,7 @@ Route::get('/products/{slug}/{product}', [ProductController::class, 'show'])
     ->name('products.show');
 
 //para cliente
+route::get('/eventos/{id}', [EventController::class, 'show'])->name('eventos.show');
 Route::get('/products/{slug}', [ProductController::class, 'getCategoryDetails'])->name('products.categoria');
 
 Route::get('/ventas/json', [ProductController::class, 'getCategoriasJson'])->name('admin.ventas.json');

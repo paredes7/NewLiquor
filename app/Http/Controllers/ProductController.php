@@ -10,6 +10,8 @@ use App\Models\ProductAttribute;
 use Illuminate\Http\Request;
 use App\Models\FeaturedProduct;
 use App\Http\Resources\FeaturedProductResource;
+use App\Models\Evento;
+use App\Http\Resources\EventResource;
 
 class ProductController extends Controller
 {
@@ -24,13 +26,30 @@ class ProductController extends Controller
     private function getFeaturedProducts()
     {
         $featuredProducts = FeaturedProduct::active()
-            ->with(['product.variants.values.attribute', 'product.multimedia'])
-            ->get();
+        ->with([
+            'product.multimedia', 
+            'product.variants.values.attribute',
+            'variant.values.attribute' // <--- Cargamos la variante específica destacada
+        ])
+        ->get();
         return FeaturedProductResource::collection($featuredProducts);
     }
 
+    /**
+     * Recupera solo la información básica del evento activo para el banner de inicio
+     */
+    private function getFeaturedEvent()
+    {
+        // Buscamos el evento activo más reciente
+        $Eventos = Evento::active() // Usando el scope definido en el modelo
+            ->orderBy('fecha_inicio', 'desc')
+            ->get();
 
-    public function search(Request $request) 
+        return EventResource::collection($Eventos);
+    }
+
+
+    public function search(Request $request)
     {
         $texto = $request->input('search'); // Captura "arroz"
 
@@ -40,95 +59,81 @@ class ProductController extends Controller
         ]);
     }
 
-    public function index(Request $request)
+    private function getFilteredProducts(Request $request, $perPage = 12)
     {
-        // 1. Recoger parámetros
         $search = $request->query('search', '');
         $filters = $request->except(['search', 'page']);
-        // $offset = (int) $request->query('page', 0);
-        $page = 1; //desde aqui se controla la paginacion
-        $perPage = 12; //desde aqui se controla cuantos productos se ven por pagina
 
-        // 2. QUERY DE PRODUCTOS (Aquí es donde aplicamos los filtros)
+        // 1. Base de la Query con Eager Loading
         $queryProducts = Product::with(['variants.values.attribute', 'multimedia'])
             ->where('available', 1);
 
-        // Filtro por búsqueda
+        // 2. Filtro por búsqueda (Nombre de producto o nombre de variante)
         if ($search) {
-            $queryProducts->where('name', 'like', "%$search%");
+            $queryProducts->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                    ->orWhereHas('variants', fn($v) => $v->where('name', 'like', "%$search%"));
+            });
         }
 
+        // 3. Filtros dinámicos por Atributos
         foreach ($filters as $key => $value) {
             if ($value) {
                 $queryProducts->whereHas('variants.values', function ($q) use ($key, $value) {
                     $q->where('value', $value)
-                        ->whereHas('attribute', function ($attrQ) use ($key) {
-                            $attrQ->where('name', $key);
-                        });
+                        ->whereHas('attribute', fn($attrQ) => $attrQ->where('name', $key));
                 });
             }
         }
 
-        //cantidad productos
-        $totalProducts = $queryProducts->count();
-
-        //obtener del pedazo actual
-        // $products = $queryProducts->skip($offset)->take($perPage)->get();
-        // $hasMoreProducts = $totalProducts > ($offset + $perPage); // Verifica si hay más productos para cargar
 
         $paginatedProducts = $queryProducts->paginate($perPage)->withQueryString();
-        // 3. QUERY DE CATEGORÍAS (Limpia)
-        $categoryQuery = Category::whereNull('parent_id');
-        if ($search) {
-            $categoryQuery->where('name', 'like', "%$search%");
-        }
 
-        $allCategories = $categoryQuery->get()->map(function ($category) {
-            return [
-                'id' => $category->id,
-                'name' => $category->name,
-                'description' => $category->description,
-                'slug' => $category->slug,
-                'image' => $category->image ?? null,
-            ];
-        });
+        return $paginatedProducts;
+    }
 
-        $categories = $allCategories->forPage($page, $perPage)->values()->all();
-        $hasMore = $allCategories->count() > $perPage;
+    public function index(Request $request)
+    {
+        $search = $request->query('search', '');
+        $filters = $request->except(['search', 'page']);
+        $perPage = 12;
 
-        //filtros
-        // Traemos atributos con sus valores
-        $attributes = ProductAttribute::with('values')->get();
+        // Obtener productos filtrados y paginados
+        $products = $this->getFilteredProducts($request, $perPage);
 
-        // Transformamos para React
+        // Lógica de Categorías
+        $categoryQuery = Category::whereNull('parent_id')
+            ->when($search, fn($q) => $q->where('name', 'like', "%$search%"));
 
-        // 4. OBTENER ATRIBUTOS PARA LOS FILTROS DEL SIDEBAR
-        $filtersData = $attributes->map(function ($attribute) {
-            return [
-                'id' => $attribute->id,
-                'name' => $attribute->name, // React usará 'name' como label
-                'values' => $attribute->values->map(function ($value) {
-                    return [
-                        'value' => $value->value,      // lo que se guardará
-                        'label' => ucfirst($value->value), // lo que se muestra
-                    ];
-                })->values(),
-            ];
-        });
+        $allCategories = $categoryQuery->get()->map(fn($category) => [
+            'id' => $category->id,
+            'name' => $category->name,
+            'description' => $category->description,
+            'slug' => $category->slug,
+            'image' => $category->image ?? null,
+        ]);
 
-        //para cargar las imagenes de los productos en la vista welcome
-        //  $productsMultimedia = Product::with(['multimedia', 'variants.values'])->get();
+        // Lógica de Atributos para el Sidebar
+        $filtersData = ProductAttribute::with('values')->get()->map(fn($attribute) => [
+            'id' => $attribute->id,
+            'name' => $attribute->name,
+            'values' => $attribute->values->map(fn($value) => [
+                'value' => $value->value,
+                'label' => ucfirst($value->value),
+            ])->values(),
+        ]);
 
         return Inertia::render('Welcome', [
-            'categories' => fn() => $categories, //como funciona fn() lazy: se ejecuta solo cuando react lo pide
-            'search' => $search,
-            'page' => $page,
-            'hasMore' => $hasMore,
-            'filtersData' => fn() => $filtersData,
-            'activeFilters' => $filters,
-            'products' => $paginatedProducts,
-            'totalProducts' => $totalProducts,
+            'categories'       => $allCategories->forPage(1, $perPage)->values()->all(),
+            'search'           => $search,
+            'page'             => $products->currentPage(),
+            'hasMore'          => $allCategories->count() > $perPage,
+            'filtersData'      => fn() => $filtersData,
+            'activeFilters'    => $filters,
+            'products'         => $products, // Objeto paginado transformado
+            'totalProducts'    => $products->total(),
             'featuredProducts' => $this->getFeaturedProducts(),
+            'eventos'          => $this->getFeaturedEvent()
         ]);
     }
 

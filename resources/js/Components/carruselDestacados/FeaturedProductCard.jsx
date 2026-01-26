@@ -9,7 +9,7 @@ export default function FeaturedProductCard({ product, index }) {
   const [isHovered, setIsHovered] = useState(false);
 
   // Obtenemos la primera imagen o un placeholder
-  const mainImage = product.multimedia?.[0]?.url || `https://via.placeholder.com/480x640?text=${product.name}`;
+  const mainImage = product.main_image || `https://via.placeholder.com/480x640?text=${product.name}`;
 
   return (
     <Link

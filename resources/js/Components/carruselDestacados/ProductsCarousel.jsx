@@ -68,13 +68,13 @@ export default function ProductCarousel({ products, title, subtitle }) {
                     className="flex gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-8 px-4"
                     style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                 >
-                    {products.map((product) => (
+                    {products.map((product, index) => (
                         <div
-                            key={product.id}
+                           key={`carousel-item-${product.id}-${index}`}
                             // Ajuste preciso para 5 columnas considerando gap-6 (24px)
                             className="flex-none w-[90%] md:w-[calc(33.33%-24px)] lg:w-[calc(20%-13px)] snap-start"
                         >
-                            <FeaturedProductCard product={product} />
+                            <FeaturedProductCard product={product} index={index} />
                         </div>
                     ))}
                 </div>

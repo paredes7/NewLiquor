@@ -7,6 +7,7 @@ import ProductShopSection from "@/Components/filterProduct/ProductShopSection";
 import Pagination from "@/Components/filterProduct/Paginacion";
 import ProductsCarousel from "@/Components/carruselDestacados/ProductsCarousel";
 import HomeSearch from "@/Components/welcome/HomeSearch";
+import EventCarousel from "@/Components/welcome/Eventos/EventCarrusel";
 
 export default function Welcome({
     categories,
@@ -17,6 +18,7 @@ export default function Welcome({
     hasMore,
     totalProducts,
     featuredProducts,
+    eventos,
 }) {
     console.log("Datos que llegan de Laravel:", {
         categories,
@@ -25,6 +27,8 @@ export default function Welcome({
     });
 
     console.log(products);
+    console.log("evento destacado", eventos);
+    console.log("filtros", filtersData);
     console.log("productos destacados", featuredProducts);
 
     return (
@@ -36,6 +40,7 @@ export default function Welcome({
              */}
 
             <CategoriesGrid categories={categories} hasMore={hasMore} />
+            <EventCarousel eventos={eventos} />
 
             <ProductsCarousel
                 title="Lo más destacado de hoy"

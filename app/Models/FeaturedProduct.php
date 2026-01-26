@@ -12,6 +12,7 @@ class FeaturedProduct extends Model
 {
     protected $fillable = [
         'product_id', //id del producto destacado
+        'product_variant_id', //id de la variante del producto destacado (opcional)
         'label', //etiqueta que se muestra en el destacado
         'sort_order', //orden en que se muestran
         'starts_at', //fecha de inicio del destacado
@@ -49,5 +50,10 @@ class FeaturedProduct extends Model
             get: fn() => $this->product->multimedia->first()?->url
                 ?? "https://via.placeholder.com/600x800",
         );
+    }
+
+    public function variant()
+    {
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
 }
