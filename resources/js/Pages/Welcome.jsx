@@ -1,10 +1,7 @@
 import Layout from "@/Layouts/MainLayout";
-import Banner from "@/Components/welcome/WelcomeSe/Banner";
-import WelcomeSection from "@/Components/welcome/WelcomeSe/WelcomeSection";
 import CategoriesGrid from "@/Components/welcome/WelcomeSe/CategoriesGrid";
 import CTAContact from "@/Components/welcome/WelcomeSe/CTAContact";
 import ProductShopSection from "@/Components/filterProduct/ProductShopSection";
-import Pagination from "@/Components/filterProduct/Paginacion";
 import ProductsCarousel from "@/Components/carruselDestacados/ProductsCarousel";
 import HomeSearch from "@/Components/welcome/HomeSearch";
 import EventCarousel from "@/Components/welcome/Eventos/EventCarrusel";
@@ -13,8 +10,6 @@ export default function Welcome({
     categories,
     products,
     filtersData,
-    search,
-    page,
     hasMore,
     totalProducts,
     featuredProducts,
