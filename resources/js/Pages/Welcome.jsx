@@ -8,7 +8,7 @@ import EventCarousel from "@/Components/welcome/Eventos/EventCarrusel";
 
 export default function Welcome({
     categories,
-    products,
+    product,
     filtersData,
     hasMore,
     totalProducts,
@@ -17,11 +17,11 @@ export default function Welcome({
 }) {
     console.log("Datos que llegan de Laravel:", {
         categories,
-        products,
+        product,
         filtersData,
     });
 
-    console.log(products);
+    console.log('products', product);
     console.log("evento destacado", eventos);
     console.log("filtros", filtersData);
     console.log("productos destacados", featuredProducts);
@@ -45,7 +45,7 @@ export default function Welcome({
 
             {/* Así de simple lo pones ahora */}
             <ProductShopSection
-                products={products}
+                product={product}
                 filtersData={filtersData || []}
                 totalProducts={totalProducts}
             />

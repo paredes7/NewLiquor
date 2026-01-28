@@ -99,7 +99,8 @@ class ProductController extends Controller
         $perPage = 12;
 
         // Obtener productos filtrados y paginados
-        $products = $this->getFilteredProducts($request, $perPage);
+        $productCrudo = $this->getFilteredProducts($request, $perPage);
+        $product = FeaturedProductResource::collection($productCrudo);
 
         // Lógica de Categorías
         $categoryQuery = Category::whereNull('parent_id')
@@ -126,12 +127,12 @@ class ProductController extends Controller
         return Inertia::render('Welcome', [
             'categories'       => $allCategories->forPage(1, $perPage)->values()->all(),
             'search'           => $search,
-            'page'             => $products->currentPage(),
+            'page'             => $productCrudo->currentPage(),
             'hasMore'          => $allCategories->count() > $perPage,
             'filtersData'      => fn() => $filtersData,
             'activeFilters'    => $filters,
-            'products'         => $products, // Objeto paginado transformado
-            'totalProducts'    => $products->total(),
+            'product'         => $product, // Objeto paginado transformado
+            'totalProducts'    => $productCrudo->total(),
             'featuredProducts' => $this->getFeaturedProducts(),
             'eventos'          => $this->getFeaturedEvent()
         ]);

@@ -6,8 +6,19 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class EventResource extends JsonResource
 {
+
+    /**
+     * Transform the resource into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+
     public function toArray($request)
     {
+
+       
+
         return [
             'id' => $this->id,
             // Datos para el EventCarrusel en el principal (Welcome.jsx)
@@ -24,7 +35,9 @@ class EventResource extends JsonResource
             
             // URL de redirección controlada por Laravel
             'url' => route('eventos.show', $this->id),
-            'anuncios' => $this->whenLoaded('anuncios'),
+
+            // Anuncios relacionados con el evento
+             'anuncios' => AnuncioResource::collection($this->whenLoaded('anuncios')),
         ];
     }
 }

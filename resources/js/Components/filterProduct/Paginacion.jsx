@@ -7,7 +7,13 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function Pagination({ links }) {
     // Si solo hay una página, no mostramos nada
-    if (links.length <= 3) return null;
+   if (!links || !Array.isArray(links)) {
+        console.warn("Pagination: links is not a valid array", links);
+        return null;
+    }
+
+    // Cambiamos a 1 para asegurarnos de que se vea si hay al menos una página
+    if (links.length <= 1) return null;
 
     //variantes para animaciones
     const containerVariants = {
@@ -55,7 +61,7 @@ export default function Pagination({ links }) {
                             key={key} //clave única
                             href={link.url} // Enlace de paginación sirve para navegar
                             preserveScroll // Evita que la página salte al inicio al cambiar
-                            only={["products", "totalProducts"]} // Optimiza la carga solo de datos necesarios
+                            only={["product", "totalProducts"]} // Optimiza la carga solo de datos necesarios
                             className={`px-4 py-2 text-sm transition-all duration-200 rounded-sm ${
                                 link.active
                                     ? "text-black font-bold"

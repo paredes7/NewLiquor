@@ -4,13 +4,15 @@
 import FilterSidebar from "@/Components/filterProduct/FilterSidebar";
 import ProductCard from "@/Components/welcome/ProductCard";
 import Pagination from "./Paginacion";
+import AnuncioProductCard from "../welcome/ProductCard";
 
 export default function ProductShopSection({
-    products,
+    product,
     filtersData,
     totalProducts,
 }) {
-    const items = products?.data || [];
+    const items = product?.data || [];
+   const paginationLinks = product?.meta?.links || product?.links || [];
     return (
         <section className="bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -53,9 +55,10 @@ export default function ProductShopSection({
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
                             {items.length > 0 ? (
                                 items.map((product) => (
-                                    <ProductCard
+                                    <AnuncioProductCard
                                         key={product.id}
                                         product={product}
+                                        index={product.id}
                                     />
                                 ))
                             ) : (
@@ -66,9 +69,11 @@ export default function ProductShopSection({
                         </div>
 
                         {/* SECCIÓN DE PAGINACIÓN (Numeritos) */}
-                        <div className="mt-10">
-                            <Pagination links={products.links} />
-                        </div>
+                      <div className="mt-10">
+                {paginationLinks.length > 0 && (
+                    <Pagination links={paginationLinks} />
+                )}
+            </div>
                     </div>
                 </div>
             </div>

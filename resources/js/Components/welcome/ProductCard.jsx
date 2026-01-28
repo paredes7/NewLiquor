@@ -1,52 +1,67 @@
+import React from "react";
 import { Link, router } from "@inertiajs/react";
 import { slugify } from "../../utils/slugify";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
-export default function ProductCard({ product }) {
-    const totalStock =
-        product.variants?.reduce((sum, v) => sum + v.stock, 0) || 0;
-
+export default function ProductCard({ product, index }) {
+    const totalStock = product.variants?.reduce((sum, v) => sum + v.stock, 0) || product.stock || 0;
     const isOutOfStock = totalStock === 0;
-
-    const imageUrl =
-        product.multimedia?.[0]?.url || "https://via.placeholder.com/600x800";
-
-    console.log(`Imagen de ${product.name}:`, imageUrl);
+    const mainImage = product.main_image || product.multimedia?.[0]?.url || "https://via.placeholder.com/600x800";
 
     return (
-        <Link
-            href={`/products/${slugify(product.name)}/${product.id}`}
-            className={` w-full h-full relative overflow-hidden rounded-3xl shadow-xl border     bg-white transition-all  duration-500 hover:scale-105  hover:shadow-2xl
-        ${
-            isOutOfStock
-                ? "border-darkTurquoise opacity-80"
-                : "border-gray-200 hover:border-red-600"
-        }
-      `}
-            style={{ fontFamily: "'Playfair Display', serif" }}
+        <motion.div
+            // EFECTO DE CRECIMIENTO: Escalamos a 1.05 al pasar el mouse
+            whileHover={{ 
+                scale: 1.05,
+                zIndex: 30, // Importante: para que flote sobre las otras tarjetas
+                transition: { duration: 0.3 } 
+            }}
+            className="w-full h-full p-2" // Padding extra para que la sombra no se corte
         >
-            <div className="w-full aspect-[4/5] p-4 bg-white border-b border-grayCustom/30 rounded-t-3xl overflow-hidden">
-                <img
-                    src={imageUrl}
-                    alt={product.name}
-                    className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105 hover:rotate-1"
-                />
-            </div>
+            <Link
+                href={`/products/${slugify(product.name)}/${product.id}`}
+                // EFECTO DE BRILLO: Usamos shadow-2xl y hover:shadow-red-600/20 si quieres color
+                className={`w-full h-full relative overflow-hidden rounded-3xl shadow-xl border bg-white flex flex-col transition-shadow duration-300
+                    ${isOutOfStock ? "border-darkTurquoise" : "border-gray-200 hover:border-red-600 hover:shadow-2xl"}
+                `}
+                style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+                {/* Contenedor de Imagen */}
+                <div className="w-full aspect-[4/5] p-4 bg-white border-b border-grayCustom/30 rounded-t-3xl overflow-hidden">
+                    <img
+                        src={mainImage}
+                        alt={product.name}
+                        className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-110"
+                    />
+                </div>
 
-            <div className="p-4 flex flex-col gap-2">
-                <h3 className="text-lg font-extrabold uppercase tracking-wide text-darkGray">
-                    {product.name}
-                </h3>
-                <h2 className="text-lg font-medium text-gray-900 h-15 overflow-hidden">
-                    {product.description}
-                </h2>
+                {/* Contenido Textual */}
+                <div className="p-4 flex flex-col gap-2 flex-grow bg-white">
+                    <span className="text-[11px] uppercase italic tracking-[0.2em]  text-gray-900 font-bold text-center">
+                        {product.category || "Categoría"}
+                    </span>
 
-                <p className="text-2xl text-center font-extrabold tracking-wide text-red-600">
-                    $ {Number(product.price).toFixed(0)}
-                </p>
+                    <h3 className="font-serif italic text-center text-[#a30f0f] text-xl font-bold uppercase tracking-tight leading-tight min-h-[40px] flex items-center justify-center">
+                        {product.name}
+                    </h3>
 
-                {/** consultar disponibilidad */}
-                <motion.span
+                    {/* Disponibilidad / Alcohol */}
+                   <p className="text-[11px] text-center italic text-gray-500">
+                        {product.content_alcohol
+                            ? `Contenido alcohólico: ${product.content_alcohol}` 
+                            : "70cl • 40% ABV"}
+                    </p>
+
+                    <h2 className="text-[14px] mb-1 font-medium italic text-gray-900 text-center min-h-[40px] flex items-center justify-center overflow-hidden leading-snug px-2">
+                        {product.description}
+                    </h2>
+
+                    <p className="text-xl italic text-center font-extrabold tracking-wide text-red-700">
+                        BOB {Number(product.price).toFixed(2)}
+                    </p>
+
+                    {/* Consultar disponibilidad con Línea Animada */}
+                    <motion.span
                     onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -55,7 +70,7 @@ export default function ProductCard({ product }) {
                         );
                     }}
                     // IMPORTANTE: relative permite que la línea se ubique respecto a este texto
-                    className="relative mt-1 inline-block text-center text-[11px] font-bold uppercase tracking-[0.2em] text-gray-700 cursor-pointer select-none"
+                    className="relative text-red-900 mt-1 mb-1 italic text-center text-[8px] font-serif uppercase tracking-[0.2em] text-gray-700 cursor-pointer select-none"
                     initial="rest"
                     whileHover="hover" // Dispara la variante "hover" en los hijos
                     animate="rest"
@@ -80,49 +95,35 @@ export default function ProductCard({ product }) {
                     />
                 </motion.span>
 
-                {/*mapeo de variantes*/}
-                <div className="flex flex-wrap gap-2">
-                    {product.variants.map((v) => (
-                        <span
-                            key={v.id}
-                            className={` px-3 py-1 text-sm   font-semibold rounded-full    border       transition
-                ${
-                    v.stock === 0
-                        ? "bg-darkGray text-white border-darkGray"
-                        : "bg-white text-darkGray border-red-600 hover:bg-red-200 hover:text-darkGray"
-                }
-              `}
+                    {/* Botón de Acción */}
+                    <div className="mt-auto pt-2">
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (!isOutOfStock) {
+                                    router.post("/cart/add", { product_id: product.id, quantity: 1 });
+                                }
+                            }}
+                            disabled={isOutOfStock}
+                            className={`w-full py-2.5 px-4 rounded-full font-bold uppercase text-[10px] tracking-widest transition-all duration-300
+                                ${isOutOfStock 
+                                    ? "bg-gray-400 text-white cursor-not-allowed" 
+                                    : "bg-red-600 hover:bg-red-700 text-white shadow-md hover:shadow-red-500/50"
+                                }`}
                         >
-                            {v.values[0]?.value}
-                        </span>
-                    ))}
-                    {/* BOTÓN para agregar al carrito */}
-                    <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            router.post("/cart/add", {
-                                product_id: product.id,
-                                quantity: 1,
-                            });
-                        }}
-                        disabled={isOutOfStock}
-                        className={`mt-2 w-full px-4 py-2 text-sm font-bold text-white rounded-full transition-colors duration-300 ${
-                            isOutOfStock
-                                ? "bg-gray-400 cursor-not-allowed"
-                                : "bg-red-600 hover:bg-red-700 cursor-pointer"
-                        }`}
-                    >
-                        Agregar al carrito
-                    </button>
-                    {/* Etiqueta de Agotado si aplica */}
-                    {isOutOfStock && (
-                        <div className="absolute top-4 right-4 bg-red-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">
-                            Agotado
-                        </div>
-                    )}
+                            {"Agregar al carrito"}
+                        </button>
+                    </div>
                 </div>
-            </div>
-        </Link>
+
+                {/* Badge Agotado */}
+                {isOutOfStock && (
+                    <div className="absolute top-4 right-4 bg-red-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase z-10">
+                        Agotado
+                    </div>
+                )}
+            </Link>
+        </motion.div>
     );
 }

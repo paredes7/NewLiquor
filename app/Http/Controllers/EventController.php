@@ -10,16 +10,24 @@ use App\Models\Anuncio;
 class EventController extends Controller
 {
    
-    //funcion para mostrar detalle del evento
+    /**
+     *  funcion para mostrar detalle del evento, anuncios
+     *  con productos disponibles y su multimedia y variantes cargadas.
+     * */
     public function show($id)
     {
        // 1. Eager Loading con filtros para optimizar la carga de productos
         $eventDetail = Evento::with([
+
+            'anuncios' => function($query) {
+                $query->select('id', 'id_Event', 'name_anuncio', 'description_anuncio');
+            },
+
             'anuncios.productos' => function($query) {
                 // Solo traemos productos disponibles y cargamos su multimedia
                 $query->where('available', 1)
                       ->with(['multimedia', 'variants.values.attribute']);
-            }
+         }
         ])->findOrFail($id);
 
         return Inertia::render('Event', [
