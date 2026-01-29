@@ -26,12 +26,29 @@ class ProductController extends Controller
     private function getFeaturedProducts()
     {
         $featuredProducts = FeaturedProduct::active()
-        ->with([
-            'product.multimedia', 
-            'product.variants.values.attribute',
-            'variant.values.attribute' // <--- Cargamos la variante específica destacada
-        ])
-        ->get();
+            ->with([
+                'product.multimedia',
+                'product.variants.values.attribute',
+                'variant.values.attribute' // <--- Cargamos la variante específica destacada
+            ])
+            ->get();
+        if ($featuredProducts->count() < 6) {
+            // si hay menos de 6 productos destacados, rellenamos con productos aleatorios disponibles
+            $necesidad = 6 - $featuredProducts->count();
+            $existingProductIds = $featuredProducts->pluck('product_id')->toArray();
+
+            // Obtener productos adicionales que no estén ya en los destacados
+            $additionalProducts = Product::where('available', 1)
+                ->whereNotIn('id', $existingProductIds)
+                ->with(['category', 'multimedia', 'variants.values.attribute'])
+                ->inRandomOrder()
+                ->take($necesidad)
+                ->get();
+
+            // Combinar ambos conjuntos
+            $featuredProducts = $featuredProducts->concat($additionalProducts);
+        }
+
         return FeaturedProductResource::collection($featuredProducts);
     }
 
@@ -98,10 +115,6 @@ class ProductController extends Controller
         $filters = $request->except(['search', 'page']);
         $perPage = 12;
 
-        // Obtener productos filtrados y paginados
-        $productCrudo = $this->getFilteredProducts($request, $perPage);
-        $product = FeaturedProductResource::collection($productCrudo);
-
         // Lógica de Categorías
         $categoryQuery = Category::whereNull('parent_id')
             ->when($search, fn($q) => $q->where('name', 'like', "%$search%"));
@@ -123,6 +136,10 @@ class ProductController extends Controller
                 'label' => ucfirst($value->value),
             ])->values(),
         ]);
+
+        // Obtener productos filtrados y paginados
+        $productCrudo = $this->getFilteredProducts($request, $perPage);
+        $product = FeaturedProductResource::collection($productCrudo);
 
         return Inertia::render('Welcome', [
             'categories'       => $allCategories->forPage(1, $perPage)->values()->all(),

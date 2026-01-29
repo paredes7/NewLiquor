@@ -3,13 +3,12 @@ import { ChevronDown, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
- * FilterSelect Profesional
- * @param {string} label - Título del filtro (ej: "Tamaño")
- * @param {Array} options - [{label: '750ml', value: '750'}]
- * @param {string} value - Valor actualmente seleccionado
- * @param {function} onChange - Función para actualizar el filtro
- * @param {string} placeholder - Texto cuando no hay nada seleccionado
+* FilterSelect Profesional
+ * 
  */
+
+
+
 export default function FilterSelect({
     label,
     options = [],
@@ -17,7 +16,6 @@ export default function FilterSelect({
     onChange,
     placeholder = "Seleccionar...",
     defaultOpen = false,
-    badge = null,
 }) {
     const [isOpen, setIsOpen] = useState(defaultOpen);
 

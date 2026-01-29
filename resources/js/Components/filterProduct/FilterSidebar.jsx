@@ -28,7 +28,7 @@ export default function FilterSidebar({ filtersData = [] }) {
         const newFilters = {
             ...selectedFilters,
             [filterLabel]: value,
-            page: 1, // Reiniciamos a la primera página al cambiar un filtro
+            page: "1", // Reiniciamos a la primera página al cambiar un filtro
         };
 
         // Si el valor es vacío, eliminamos la propiedad para limpiar la URL
@@ -57,7 +57,7 @@ export default function FilterSidebar({ filtersData = [] }) {
                 preserveState: true,
                 preserveScroll: true,
                 replace: true,
-                only: ["products", "filtersData", "totalProducts"],
+                only: ["product", "filtersData", "totalProducts"],
             },
         );
     };
