@@ -2,6 +2,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Product;;
+use App\Models\MultimediaType;
 
 class ProductMultimedia extends Model
 {
@@ -10,7 +12,9 @@ class ProductMultimedia extends Model
         'multimedia_type_id',
         'url',
         'type',
-        'sort_order'
+        'sort_order',
+        'title',
+        'description'
     ];
 
     public function product()

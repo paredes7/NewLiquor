@@ -19,9 +19,6 @@ export default function Header() {
   console.log("Categorías que llegan del servidor:", categories);
   console.log("Subcategorías que llegan del servidor:", allSubCategories);
   const [activeMenu, setActiveMenu] = useState(null);
-  const getSubCategories = (parentId) => {
-    return allSubCategories?.filter(sub => sub.parent_id == parentId) || [];
-  };
 
 
   const [selectedCurrency, setSelectedCurrency] = useState({ 
