@@ -101,7 +101,7 @@ export default function ProductCarousel({
                             // Ajuste preciso para 5 columnas considerando gap-6 (24px)
                             className={`flex-none w-[90%] ${columnWidths[columns]} snap-start`}
                         >
-                            <CardComponent product={product} index={index} />
+                            <CardComponent product={product} />
                         </div>
                     ))}
                 </div>

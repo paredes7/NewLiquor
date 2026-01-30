@@ -3,7 +3,7 @@ import { Link, router } from "@inertiajs/react";
 import { slugify } from "../../utils/slugify";
 import { motion } from "framer-motion";
 
-export default function ProductCard({ product, index }) {
+export default function ProductCard({ product}) {
     const totalStock = product.variants?.reduce((sum, v) => sum + v.stock, 0) || product.stock || 0;
     const isOutOfStock = totalStock === 0;
     const mainImage = product.main_image || product.multimedia?.[0]?.url || "https://via.placeholder.com/600x800";

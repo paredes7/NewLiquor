@@ -5,7 +5,7 @@ import React from 'react';
 import { Link } from '@inertiajs/react';
 import { useState } from 'react';
 
-export default function FeaturedProductCard({ product, index }) {
+export default function FeaturedProductCard({ product }) {
   const [isHovered, setIsHovered] = useState(false);
 
   // Obtenemos la primera imagen o un placeholder
@@ -16,7 +16,7 @@ export default function FeaturedProductCard({ product, index }) {
       href={`/products/${product.slug}/${product.id}`}
       className="group relative bg-white rounded-xl overflow-hidden border border-gray-200 transition-all duration-500 hover:shadow-xl hover:border-gray-300 flex flex-col h-full"
       style={{
-        animationDelay: `${index * 80}ms`,
+        animationDelay: `${product.id * 80}ms`,
         animation: 'fadeInUp 0.6s ease-out forwards',
         opacity: 0
       }}

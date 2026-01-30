@@ -2,9 +2,9 @@
 //PARA MOSTRAR LA SECCION DE PRODUCTOS CON FILTROS
 //descripción: Componente principal para mostrar la sección de productos con filtros aplicables en la página de tienda.
 import FilterSidebar from "@/Components/filterProduct/FilterSidebar";
-import ProductCard from "@/Components/welcome/ProductCard";
+
 import Pagination from "./Paginacion";
-import AnuncioProductCard from "../welcome/ProductCard";
+import ProductCard from "../welcome/ProductCard";
 
 export default function ProductShopSection({
     product,
@@ -55,10 +55,9 @@ export default function ProductShopSection({
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
                             {items.length > 0 ? (
                                 items.map((product) => (
-                                    <AnuncioProductCard
+                                    <ProductCard
                                         key={product.id}
                                         product={product}
-                                        index={product.id}
                                     />
                                 ))
                             ) : (
