@@ -68,11 +68,38 @@ class ProductController extends Controller
 
     public function search(Request $request)
     {
-        $texto = $request->input('search'); // Captura "arroz"
+        $texto = $request->input('search');
+
+        // 1. Buscamos categorías que coincidan exactamente o parcialmente con el texto
+        $matchedCategories = Category::where('name', 'LIKE', "%{$texto}%")->get();
+        
+        $matchedCategoryIds = $matchedCategories->pluck('id')->toArray();
+        
+        $subCategoryIds = Category::whereIn('parent_id', $matchedCategoryIds)->pluck('id')->toArray();
+        
+        $allRelevantIds = array_unique(array_merge($matchedCategoryIds, $subCategoryIds));
+
+       
+        $products = Product::with(['variants.values', 'multimedia', 'category'])
+            ->where(function($q) use ($texto, $allRelevantIds) {
+                if (!empty($allRelevantIds)) {
+                    $q->whereIn('category_id', $allRelevantIds);
+                } else {
+                    // Si no es una categoría, buscamos coincidencias en el producto
+                    $q->where('name', 'LIKE', "%{$texto}%")
+                    ->orWhere('brand', 'LIKE', "%{$texto}%");
+                }
+            })
+            ->get();
+
+        // 4. Agrupamos por el nombre de la categoría para la vista
+        $groupedResults = $products->groupBy(function($item) {
+            return $item->category->name ?? 'Resultados Generales';
+        });
 
         return Inertia::render('ResultPage', [
             'search' => $texto,
-            'products' => [] // Por ahora enviamos vacío
+            'groupedResults' => $groupedResults 
         ]);
     }
 

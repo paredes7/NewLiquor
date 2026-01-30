@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ParteArriba from './Header/partearriba';
 import NavLink from './Header/Navlink';
 import MegaMenu from './Header/MegaMenu';
@@ -12,19 +12,8 @@ export default function Header() {
 
 
   const [expandedSection, setExpandedSection] = useState(null);
-  /** 
-  const { categories, subCategories } = usePage().props;
 
-  const whiskyCategory = categories?.find(cat => cat.slug === 'whisky'); 
-  console.log("Resultado final del Padre whisky:", whiskyCategory);
-
-  const subCategorieWhisky = subCategories?.filter(sub => sub.parent_id ==  whiskyCategory?.id) || [];
-
-  
-  console.log("Subcategorías de la DB:", subCategorieWhisky);
-  
-  const [showWhiskyMenu, setShowWhiskyMenu] = useState(false);
-  */
+  const currencyRef = useRef(null);
 
   const { categories, allSubCategories, otrosLicoresData, NewProducts } = usePage().props;
   console.log("Categorías que llegan del servidor:", categories);
@@ -58,6 +47,18 @@ export default function Header() {
     { href: '/Otros licores', label: 'Otros licores' },
 
   ];
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Si el menú está abierto y el clic NO es dentro del div referenciado
+      if (currencyRef.current && !currencyRef.current.contains(event.target)) {
+        setCurrencyOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -140,7 +141,7 @@ export default function Header() {
                     
 
           {/* Selector de Moneda/País */}
-          <div className="relative w-44 flex justify-end"> 
+          <div ref={currencyRef} className="relative w-44 flex justify-end">
             <button 
               onClick={() => setCurrencyOpen(!currencyOpen)}
               className="w-full flex items-center justify-between gap-2 text-sm font-medium text-gray-700 hover:text-black transition-colors py-2 px-3 border border-gray-100 rounded-lg hover:bg-gray-50"
