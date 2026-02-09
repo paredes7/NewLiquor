@@ -38,7 +38,8 @@ export default function ProductCard({ product}) {
                 {/* Contenido Textual */}
                 <div className="p-4 flex flex-col gap-2 flex-grow bg-white">
                     <span className="text-[11px] uppercase italic tracking-[0.2em]  text-gray-900 font-bold text-center">
-                        {product.category || "Categoría"}
+                        {/* Accedemos al nombre si existe, si no, mostramos "Categoría" */}
+                        {product.category?.name || "Categoría"}
                     </span>
 
                     <h3 className="font-serif italic text-center text-[#a30f0f] text-xl font-bold uppercase tracking-tight leading-tight min-h-[40px] flex items-center justify-center">

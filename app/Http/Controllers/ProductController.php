@@ -70,31 +70,29 @@ class ProductController extends Controller
     {
         $texto = $request->input('search');
 
-        // 1. Buscamos categorías que coincidan exactamente o parcialmente con el texto
-        $matchedCategories = Category::where('name', 'LIKE', "%{$texto}%")->get();
-        
-        $matchedCategoryIds = $matchedCategories->pluck('id')->toArray();
-        
+        // 1. Obtener IDs de categorías que coincidan (incluyendo subcategorías)
+        $matchedCategoryIds = Category::where('name', 'LIKE', "%{$texto}%")->pluck('id')->toArray();
         $subCategoryIds = Category::whereIn('parent_id', $matchedCategoryIds)->pluck('id')->toArray();
-        
         $allRelevantIds = array_unique(array_merge($matchedCategoryIds, $subCategoryIds));
 
-       
+        // 2. Búsqueda combinada: NO usamos else, usamos una consulta inclusiva
         $products = Product::with(['variants.values', 'multimedia', 'category'])
             ->where(function($q) use ($texto, $allRelevantIds) {
+                // Busca por nombre del producto
+                $q->where('name', 'LIKE', "%{$texto}%")
+                // O busca por marca
+                ->orWhere('brand', 'LIKE', "%{$texto}%");
+                
+                // O si el texto coincidió con alguna categoría, trae esos productos también
                 if (!empty($allRelevantIds)) {
-                    $q->whereIn('category_id', $allRelevantIds);
-                } else {
-                    // Si no es una categoría, buscamos coincidencias en el producto
-                    $q->where('name', 'LIKE', "%{$texto}%")
-                    ->orWhere('brand', 'LIKE', "%{$texto}%");
+                    $q->orWhereIn('category_id', $allRelevantIds);
                 }
             })
             ->get();
 
-        // 4. Agrupamos por el nombre de la categoría para la vista
+        // 3. Agrupamos para tu ResultPage.jsx
         $groupedResults = $products->groupBy(function($item) {
-            return $item->category->name ?? 'Resultados Generales';
+            return $item->category->name ?? 'Sin Categoría';
         });
 
         return Inertia::render('ResultPage', [
@@ -102,7 +100,7 @@ class ProductController extends Controller
             'groupedResults' => $groupedResults 
         ]);
     }
-
+    
     private function getFilteredProducts(Request $request, $perPage = 12)
     {
         $search = $request->query('search', '');
