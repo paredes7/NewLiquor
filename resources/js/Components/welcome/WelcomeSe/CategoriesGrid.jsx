@@ -1,3 +1,4 @@
+z
 import { Link } from '@inertiajs/react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -68,7 +69,7 @@ export default function CategoriesGrid({ categories }) {
 
         {/* Contenedor del Carrusel */}
         <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="popLayout">
             {visibleCategories.map((category, index) => (
               <motion.div
                 key={category.id}
@@ -85,7 +86,7 @@ export default function CategoriesGrid({ categories }) {
                 >
                   <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
                     <img
-                      src={category.image || `https://via.placeholder.com/480x360?text=${category.name}`}
+                      src={category.image || "/images/placeholder-category.jpg"}
                       alt={category.name}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
