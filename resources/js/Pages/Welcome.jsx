@@ -1,6 +1,5 @@
 import Layout from "@/Layouts/MainLayout";
-import CategoriesGrid from "@/Components/welcome/WelcomeSe/CategoriesGrid";
-import CTAContact from "@/Components/welcome/WelcomeSe/CTAContact";
+import CategoriesGrid from "@/Components/welcome/CategoriesGrid";
 import ProductShopSection from "@/Components/filterProduct/ProductShopSection";
 import ProductsCarousel from "@/Components/carruselDestacados/ProductsCarousel";
 import HomeSearch from "@/Components/welcome/HomeSearch";
@@ -34,7 +33,7 @@ export default function Welcome({
              *  <WelcomeSection />
              */}
 
-            <CategoriesGrid categories={categories} hasMore={hasMore} />
+            <CategoriesGrid categories={categories} />
             <EventCarousel eventos={eventos} />
 
             <ProductsCarousel
@@ -49,7 +48,7 @@ export default function Welcome({
                 filtersData={filtersData || []}
                 totalProducts={totalProducts}
             />
-            <CTAContact />
+            
         </Layout>
     );
 }

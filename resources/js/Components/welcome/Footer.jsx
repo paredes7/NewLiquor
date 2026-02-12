@@ -1,4 +1,5 @@
 import { Facebook, Instagram, Youtube } from 'lucide-react';
+import { Link } from '@inertiajs/react';
 
 export default function Footer() {
   const socialLinks = [
@@ -75,9 +76,15 @@ export default function Footer() {
           {/* Columna 4: Botón de Acción y Advertencia */}
           <div className="space-y-6">
             <h4 className="text-white font-bold mb-6 uppercase text-sm tracking-widest">Atención al Cliente</h4>
-            <button className="w-full py-3 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition">
+            
+            {/* Este Link te llevará a resources/js/Pages/Contact.jsx */}
+            <Link 
+              href={route('contact')}
+              className="w-full py-3 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition flex items-center justify-center"
+            >
               Escríbenos por WhatsApp
-            </button>
+            </Link>
+
             <div className="p-4 border border-gray-800 rounded-lg">
               <p className="text-[10px] text-gray-500 leading-tight uppercase text-center">
                 EL ABUSO EN EL CONSUMO DE ALCOHOL ES NOCIVO PARA LA SALUD. PROHIBIDA LA VENTA A MENORES DE 18 AÑOS.

@@ -18,6 +18,15 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReportController;
 use Inertia\Inertia;
 use App\Http\Controllers\FilterController;
+use App\Http\Controllers\PaymentController;
+
+//para ir a PaymentPage.jsx
+Route::get('/finalizar-pago', [PaymentController::class, 'index'])->name('payment.index');
+
+//para ir a contact.jsx
+Route::get('/contacto', function () {
+    return Inertia::render('Contact');
+})->name('contact');
 
 
 Route::get('/', [ProductController::class, 'index'])->name('welcome');

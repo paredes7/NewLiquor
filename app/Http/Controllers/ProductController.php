@@ -12,6 +12,7 @@ use App\Models\FeaturedProduct;
 use App\Http\Resources\FeaturedProductResource;
 use App\Models\Evento;
 use App\Http\Resources\EventResource;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -69,30 +70,49 @@ class ProductController extends Controller
     public function search(Request $request)
     {
         $texto = $request->input('search');
-
-        // 1. Buscamos categorías que coincidan exactamente o parcialmente con el texto
+        Log::info("--- Nueva Búsqueda: " . $texto . " ---");
+        // 1. Buscamos todas las categorías que coincidan con el texto
         $matchedCategories = Category::where('name', 'LIKE', "%{$texto}%")->get();
         
-        $matchedCategoryIds = $matchedCategories->pluck('id')->toArray();
+        // 2. FILTRADO ESTRICTO:
+        // Si entre lo que encontramos hay subcategorías (tienen parent_id), 
+        // nos quedamos SOLO con ellas para no mostrar el padre.
+        $subCategories = $matchedCategories->filter(fn($cat) => !is_null($cat->parent_id));
         
-        $subCategoryIds = Category::whereIn('parent_id', $matchedCategoryIds)->pluck('id')->toArray();
-        
-        $allRelevantIds = array_unique(array_merge($matchedCategoryIds, $subCategoryIds));
+        if ($subCategories->isNotEmpty()) {
+            Log::info("Entró al IF: Se detectaron subcategorías.");
+            // Caso: Buscaste "Vino Tinto" -> Solo obtenemos IDs de las subcategorías encontradas
+            $allRelevantIds = $subCategories->pluck('id')->toArray();
+        } else {
+            Log::info("Entró al IF: Se detectaron categoria.");
+            // Caso: Buscaste "Vino" (Padre) -> Obtenemos el ID del padre y sus hijos
+            $parentIds = $matchedCategories->pluck('id')->toArray();
+            $childIds = Category::whereIn('parent_id', $parentIds)->pluck('id')->toArray();
+            $allRelevantIds = array_unique(array_merge($parentIds, $childIds));
+        }
+        Log::info("Contenido de allRelevantIds2:", $allRelevantIds);
 
-       
+        // 3. Consulta de Productos (Inclusiva con el nombre del producto)
         $products = Product::with(['variants.values', 'multimedia', 'category'])
-            ->where(function($q) use ($texto, $allRelevantIds) {
-                if (!empty($allRelevantIds)) {
-                    $q->whereIn('category_id', $allRelevantIds);
-                } else {
-                    // Si no es una categoría, buscamos coincidencias en el producto
-                    $q->where('name', 'LIKE', "%{$texto}%")
-                    ->orWhere('brand', 'LIKE', "%{$texto}%");
-                }
-            })
-            ->get();
-
-        // 4. Agrupamos por el nombre de la categoría para la vista
+        ->where(function($q) use ($texto, $allRelevantIds) {
+            
+            if (!empty($allRelevantIds)) {
+                // LÓGICA DE FILTRO DIRECTO:
+                // Si el usuario buscó "Vino Tinto" y encontramos su ID (23),
+                // traemos TODOS los productos que tengan category_id = 23.
+                // Ignoramos el "LIKE" del nombre para que no entren productos de "Vino" (Padre).
+                $q->whereIn('category_id', $allRelevantIds);
+            } else {
+                // LÓGICA DE COINCIDENCIAS (Solo si no es categoría):
+                // Si el texto no coincide con ninguna categoría (ej: "Malbec" o "Absolut"),
+                // entonces buscamos por nombre o marca.
+                $q->where('name', 'LIKE', "%{$texto}%")
+                ->orWhere('brand', 'LIKE', "%{$texto}%");
+            }
+        })
+        ->get();
+        Log::info("Productos encontrados:", $products->pluck('name')->toArray());
+        // 4. Agrupamos para la vista
         $groupedResults = $products->groupBy(function($item) {
             return $item->category->name ?? 'Resultados Generales';
         });
