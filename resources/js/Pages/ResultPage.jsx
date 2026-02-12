@@ -1,6 +1,6 @@
 import Layout from '@/Layouts/MainLayout';
 import ProductCard from '@/Components/welcome/ProductCard';
-import SearchBar from '@/Components/welcome/Search'; // Importamos tu componente Search
+import SearchBar from '@/Components/search/Search'; // Importamos tu componente Search
 import { router } from '@inertiajs/react';
 
 export default function ResultPage({ search, groupedResults }) {

@@ -1,8 +1,8 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
-import ParteArriba from './Header/partearriba';
-import NavLink from './Header/Navlink';
-import MegaMenu from './Header/MegaMenu';
+import ParteArriba from './partearriba';
+import NavLink from './Navlink';
+import MegaMenu from './MegaMenu';
 
 export default function Header() {
 
@@ -16,8 +16,7 @@ export default function Header() {
   const currencyRef = useRef(null);
 
   const { categories, allSubCategories, otrosLicoresData, NewProducts } = usePage().props;
-  console.log("Categorías que llegan del servidor:", categories);
-  console.log("Subcategorías que llegan del servidor:", allSubCategories);
+  
   const [activeMenu, setActiveMenu] = useState(null);
 
 
@@ -66,6 +65,11 @@ export default function Header() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleAutoSearch = (e, searchTerm) => {
+    e.preventDefault(); 
+    router.get('/buscar', { search: searchTerm }); // Envía el texto al controlador
+  };
 
   return (
     <>
@@ -118,9 +122,12 @@ export default function Header() {
                   }}
                   onMouseLeave={() => setActiveMenu(null)}
                 >
-                  <NavLink href={link.href} className="flex items-center gap-1 py-4">
+                  <button 
+                    onClick={(e) => handleAutoSearch(e, link.label)} 
+                    className="flex items-center gap-1 py-4 hover:text-orange-600 transition-colors"
+                  >
                     {link.label}
-                  </NavLink>
+                  </button>
 
                   {/* 3. Renderizado condicional ajustado */}
                   {activeMenu && (
@@ -156,7 +163,7 @@ export default function Header() {
                 <span className="whitespace-nowrap">{selectedCurrency.label}</span>
               </div>
               
-              <svg className={`w-4 h-4 transition-transform ${currencyOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-4 h-4 transition-transform text-black ${currencyOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
@@ -255,19 +262,21 @@ export default function Header() {
                 <div key={link.href} className="flex flex-col border-b border-gray-50 last:border-none">
                   {/* Botón de Nivel Superior */}
                   <div className="flex justify-between items-center">
-                    <Link
-                      href={link.href}
-                      className="flex-1 text-gray-700 hover:text-orange-600 font-bold py-4"
-                      onClick={() => setMobileMenuOpen(false)}
+                    <button
+                      onClick={(e) => {
+                        handleAutoSearch(e, link.label); // Dispara la búsqueda automática
+                        setMobileMenuOpen(false); // Cierra el menú móvil
+                      }}
+                      className="flex-1 text-left text-gray-700 hover:text-orange-600 font-bold py-4"
                     >
                       {link.label}
-                    </Link>
+                    </button>
                     
                     {/* Si tiene datos, mostramos el botón para expandir */}
                     {displayData.length > 0 && (
                       <button 
                         onClick={() => setExpandedSection(isExpanded ? null : sectionKey)}
-                        className="p-4 text-gray-400"
+                        className="p-4 text-black"
                       >
                         <svg 
                           className={`w-5 h-5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} 
@@ -287,11 +296,19 @@ export default function Header() {
                   >
                     <div className="grid grid-cols-1 gap-4 pl-4 border-l-2 border-orange-500 bg-gray-50/50 p-3 rounded-r-xl">
                       {displayData.map((item) => (
-                        <Link
+                        <button
                           key={item.id}
-                          href={isNuevos ? `/producto/${item.slug}` : `/categorias/${item.slug}`}
-                          className="flex items-center gap-4 group"
-                          onClick={() => setMobileMenuOpen(false)}
+                          onClick={(e) => {
+                            // Si es un producto nuevo, lo ideal es que vaya a su detalle. 
+                            // Si es categoría, activamos la búsqueda automática.
+                            if (isNuevos) {
+                              router.get(`/producto/${item.slug}`);
+                            } else {
+                              handleAutoSearch(e, item.name);
+                            }
+                            setMobileMenuOpen(false);
+                          }}
+                          className="flex items-center gap-4 group text-left w-full"
                         >
                           {isNuevos && item.image_url && (
                             <img src={item.image_url} className="w-10 h-10 object-contain bg-white rounded-md border border-gray-100" />
@@ -302,7 +319,7 @@ export default function Header() {
                               {isNuevos ? `${item.price} BOB` : item.description}
                             </span>
                           </div>
-                        </Link>
+                        </button>
                       ))}
                     </div>
                   </div>

@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import Header from '@/Components/welcome/Header';
+import Header from '@/Components/welcome/Header/Header';
 import Footer from '@/Components/welcome/Footer';
 import { CartProvider } from '@/Contexts/CartContext';
 
