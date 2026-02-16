@@ -19,6 +19,7 @@ use App\Http\Controllers\ReportController;
 use Inertia\Inertia;
 use App\Http\Controllers\FilterController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\CategoryController;
 
 //para ir a PaymentPage.jsx
 Route::get('/finalizar-pago', [PaymentController::class, 'index'])->name('payment.index');
@@ -74,6 +75,17 @@ Route::prefix('admin')->group(function () {
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
     Route::middleware('auth:admin')->group(function () {
+
+        //para acceder desde el dashboard hacia el catalogo
+        Route::get('/dashboard', [AdminControllerDashboard::class, 'index']);
+        
+        Route::get('/catalogo', [CategoryController::class, 'index'])->name('admin.catalogo');
+        //para poder guardar los cambios de modo editar
+        Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
+        //para poder agregar una categoria
+        Route::post('admin/categories', [CategoryController::class, 'store'])->name('categories.store');
+        //para poder eliminar una categoria
+        Route::delete('/admin/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
         Route::get('/dashboard', [AdminControllerDashboard::class, 'index']);
 

@@ -1,0 +1,56 @@
+import { useState } from "react";
+import { Head } from "@inertiajs/react";
+import AdminHeader from "@/Components/admin/AdminHeader.jsx";
+// Importamos el componente de gestión que crearemos a continuación
+import CategoryManager from "@/Components/admin/Categorias/CategoryManager.jsx";
+
+export default function Catalog({ categories = [] }) {
+    const [activeTab, setActiveTab] = useState("categories");
+
+    return (
+        <div className="min-h-screen bg-[#FDFDFF] flex flex-col font-sans selection:bg-indigo-100">
+            <Head title="Catalog Management" />
+            <AdminHeader />
+
+            <main className="container mx-auto py-10 px-6">
+                
+                {/* 1. Switch de Navegación Estilizado */}
+                <div className="flex justify-center mb-12">
+                    <div className="inline-flex bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100">
+                        <button
+                            onClick={() => setActiveTab("categories")}
+                            className={`px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
+                                activeTab === "categories" 
+                                ? "bg-gray-900 text-white shadow-lg shadow-gray-200" 
+                                : "text-gray-400 hover:text-gray-600"
+                            }`}
+                        >
+                            Categories
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("products")}
+                            className={`px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
+                                activeTab === "products" 
+                                ? "bg-gray-900 text-white shadow-lg shadow-gray-200" 
+                                : "text-gray-400 hover:text-gray-600"
+                            }`}
+                        >
+                            Products
+                        </button>
+                    </div>
+                </div>
+
+                {/* 2. Renderizado de Contenido */}
+                {activeTab === "categories" ? (
+                    <CategoryManager categories={categories} />
+                ) : (
+                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[2.5rem] border border-dashed border-gray-200">
+                        <span className="text-4xl mb-4">🚀</span>
+                        <h2 className="text-xl font-bold text-gray-800">Products Section</h2>
+                        <p className="text-gray-400">Pronto diseñaremos la gestión de inventario aquí.</p>
+                    </div>
+                )}
+            </main>
+        </div>
+    );
+}

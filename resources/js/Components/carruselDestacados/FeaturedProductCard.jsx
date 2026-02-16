@@ -17,9 +17,8 @@ export default function FeaturedProductCard({ product }) {
       className="group relative bg-white rounded-xl overflow-hidden border border-gray-200 transition-all duration-500 hover:shadow-xl hover:border-gray-300 flex flex-col h-full"
       style={{
         animationDelay: `${product.id * 80}ms`,
-        animation: 'fadeInUp 0.6s ease-out forwards',
-        opacity: 0
-      }}
+        opacity: 1 // Forzamos la visibilidad para descartar fallos de CSS
+    }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
