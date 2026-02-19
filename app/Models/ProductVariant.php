@@ -8,15 +8,15 @@ class ProductVariant extends Model
     protected $fillable = [
         'sku',
         'product_id',
-        'name',
-        'description',
-        'price',
-        'stock'
+        'volume',      
+        'price',       
+        'stock',     
+        'available',  
+        'image_variant_url' 
     ];
 
-    public function product()
-    {
-        return $this->belongsTo(Product::class);
+    public function product() {
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
     public function values()
@@ -26,6 +26,16 @@ class ProductVariant extends Model
             'product_variant_values',
             'variant_id',
             'attribute_value_id'
+        );
+    }
+    
+    public function multimedia() {
+        // Relación Muchos a Muchos usando la tabla intermedia variant_multimedia
+        return $this->belongsToMany(
+            ProductMultimedia::class, 
+            'variant_multimedia', 
+            'variant_id', 
+            'multimedia_id'
         );
     }
 }

@@ -13,6 +13,9 @@ use App\Http\Resources\FeaturedProductResource;
 use App\Models\Evento;
 use App\Http\Resources\EventResource;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Intervention\Image\Laravel\Facades\Image;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class ProductController extends Controller
 {
@@ -353,11 +356,270 @@ class ProductController extends Controller
         return Inertia::render('Products/CategoriesPage', [
             'categories' => $categories,
             'selectedCategory' => $selectedCategory,
-            'search' => $search,
+            'search' => $search,    
             'page' => $page,
             'hasMore' => $hasMore,
         ]);
     }
 
     //obtener productos mas destacados de hoy
+
+
+
+
+
+
+    /**
+     * Vista principal del administrador de productos
+     */
+    public function adminIndex()
+    {
+        // Cargamos los productos con la jerarquía completa (Solución B)
+        $products = Product::with(['variants.multimedia', 'category'])->get();
+        $categories = Category::whereNull('parent_id')->get();
+
+        return Inertia::render('Admin/Inventory/ProductInventory', [ // <--- Nuevo nombre de archivo
+            'products' => $products,
+            'categories' => $categories
+        ]);
+    }
+
+    /**
+     * Para actualizar el stock o precio rápido desde la Card
+     */
+    public function updateVariantStock(Request $request, $id)
+    {
+        $variant = \App\Models\ProductVariant::findOrFail($id);
+        $variant->update($request->only(['stock', 'price', 'available']));
+        
+        return back()->with('message', 'Inventario actualizado');
+    }
+
+    public function store(Request $request)
+    {
+        // Validamos los datos mínimos requeridos para el sistema
+        $request->validate([
+            'name' => 'required|string|max:200',
+            'category_id' => 'required|exists:categories,id',
+            'brand' => 'required|string|max:200',
+            'alcohol_content' => 'required|string|max:200',
+        ]);
+
+        return DB::transaction(function () use ($request) {
+            // 1. Crear el Producto (Padre) sin variantes
+            $product = Product::create([
+                'category_id' => $request->category_id,
+                'name' => $request->name,
+                'brand' => $request->brand,
+                'alcohol_content' => $request->alcohol_content,
+                'description' => $request->description, // Puede ser null
+                'longDescription' => null, // Forzado a null por ahora
+                'slug' => \Illuminate\Support\Str::slug($request->name), // Generación automática
+            ]);
+
+            return back()->with('message', 'Producto base creado con éxito. ¡Listo para añadir variantes!');
+        });
+    }
+    public function update(Request $request, $id)
+    {
+        return DB::transaction(function () use ($request, $id) {
+            $product = Product::findOrFail($id);
+
+            // 1. Actualizar datos del Producto (Padre)
+            $product->update([
+                'category_id' => $request->category_id,
+                'name' => $request->name,
+                'brand' => $request->brand,
+                'alcohol_content' => $request->alcohol_content,
+                'description' => $request->description,
+                'slug' => \Illuminate\Support\Str::slug($request->name),
+            ]);
+
+            // 2. Actualizar Variantes (Hijos)
+            foreach ($request->variants as $index => $variantData) {
+                $variant = \App\Models\ProductVariant::findOrFail($variantData['id']);
+                
+                // Si el frontend envió un archivo en este índice
+                if ($request->hasFile("variants.{$index}.newFile")) {
+                    $file = $request->file("variants.{$index}.newFile");
+
+                    // 1. PROCESAMIENTO: Redimensionar y convertir a WebP (600x600)
+                    $img = Image::read($file)
+                        ->cover(600, 600)
+                        ->encodeByExtension('webp', quality: 75);
+
+                    // 2. ALMACENAMIENTO: Usando la ruta técnica de tu CategoryController
+                    try {
+                        $base64Image = "data:image/webp;base64," . base64_encode($img);
+
+                        $result = cloudinary()->uploadApi()->upload(
+                            $base64Image, 
+                            [
+                                'folder' => 'catalogo_licores',
+                                'format' => 'webp' 
+                            ]
+                        );
+
+                        if (isset($result['secure_url'])) {
+                            // 1. Buscamos la relación en la tabla puente 'variant_multimedia'
+                            $pivot = \DB::table('variant_multimedia')
+                                ->where('variant_id', $variant->id)
+                                ->first();
+
+                            if ($pivot) {
+                                // 2. Si existe el vínculo, vamos a 'product_multimedia' y actualizamos la URL
+                                \App\Models\ProductMultimedia::where('id', $pivot->multimedia_id)
+                                    ->update(['url' => $result['secure_url']]);
+                                    
+                            } else {
+                                // 3. Caso borde: Si la variante no tenía foto antes, creamos el registro inicial
+                                $newMultimedia = \App\Models\ProductMultimedia::create([
+                                    'url' => $result['secure_url'],
+                                    'type' => 'image',
+                                    'multimedia_type_id' => 1
+                                ]);
+
+                                \DB::table('variant_multimedia')->insert([
+                                    'variant_id' => $variant->id,
+                                    'multimedia_id' => $newMultimedia->id
+                                ]);
+                            }
+
+                            // 4. Mantenimiento: También actualizamos el campo directo por si acaso
+                            $variant->update(['image_variant_url' => $result['secure_url']]);
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Error de subida Cloudinary: ' . $e->getMessage());
+                    }
+                }
+
+                // Actualizamos precios y stock (convirtiendo coma a punto)
+                $variant->update([
+                    'price' => str_replace(',', '.', $variantData['price']),
+                    'stock' => $variantData['stock']
+                ]);
+            }
+            
+            return back()->with('message', 'Producto y variantes actualizados con éxito');
+        });
+    }
+
+    public function addVariant(Request $request)
+    {
+        // 1. Validamos los datos (añadimos la validación de la imagen)
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'volume' => 'required|string|max:200',
+            'price' => 'required|numeric',
+            'stock' => 'required|integer',
+            'image_file' => 'nullable|image|max:2048', // Opcional, máximo 2MB
+        ]);
+
+        return DB::transaction(function () use ($request) {
+            // 2. Generación del SKU correlativo
+            $count = \App\Models\ProductVariant::where('product_id', $request->product_id)->count();
+            $newSku = "SKU-{$request->product_id}-" . ($count + 1);
+
+            // 3. Creamos la variante
+            $variant = \App\Models\ProductVariant::create([
+                'product_id' => $request->product_id,
+                'volume' => $request->volume,
+                'price' => $request->price,
+                'stock' => $request->stock,
+                'sku' => $newSku,
+                'available' => 1
+            ]);
+
+            // 4. GESTIÓN DE IMAGEN (Si se seleccionó una foto en el modal)
+            if ($request->hasFile('image_file')) {
+                try {
+                    // A. Procesamiento con Intervention Image (600x600 WebP)
+                    $img = \Intervention\Image\Laravel\Facades\Image::read($request->file('image_file'))
+                        ->cover(600, 600)
+                        ->encodeByExtension('webp', quality: 75);
+
+                    // B. Subida a Cloudinary usando la ruta API que ya te funcionó
+                    $result = cloudinary()->uploadApi()->upload(
+                        "data:image/webp;base64," . base64_encode($img), 
+                        ['folder' => 'catalogo_licores']
+                    );
+
+                    if (isset($result['secure_url'])) {
+                        // C. Crear el registro en product_multimedia
+                        $multimedia = \App\Models\ProductMultimedia::create([
+                            'url' => $result['secure_url'],
+                            'type' => 'image',
+                            'multimedia_type_id' => 1 // Asumiendo 1 para imágenes
+                        ]);
+
+                        // D. Vincular en la tabla puente variant_multimedia
+                        \DB::table('variant_multimedia')->insert([
+                            'variant_id' => $variant->id,
+                            'multimedia_id' => $multimedia->id
+                        ]);
+
+                        // E. Actualizar el campo directo por compatibilidad
+                        $variant->update(['image_variant_url' => $result['secure_url']]);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Error al subir imagen de variante: ' . $e->getMessage());
+                }
+            }
+
+            return back()->with('message', 'Variante e imagen añadidas correctamente');
+        });
+    }
+
+
+    public function destroy(Product $product)
+    {
+        return DB::transaction(function () use ($product) {
+            // 1. Obtener todas las variantes del producto para limpiar sus imágenes
+            $variants = $product->variants()->with('multimedia')->get();
+
+            foreach ($variants as $variant) {
+                foreach ($variant->multimedia as $media) {
+                    //Opcional: Borrar de Cloudinary si tienes el public_id
+                    $publicId = $this->getPublicIdFromUrl($media->url);
+                    cloudinary()->uploadApi()->destroy($publicId);
+
+                    // Borrar registro de la tabla multimedia
+                    $media->delete(); 
+                }
+                // Las relaciones en 'variant_multimedia' se borran solas si usaste cascade en la BD
+                $variant->delete();
+            }
+
+            // 2. Finalmente, borrar el producto padre
+            $product->delete();
+
+            return back()->with('message', 'Producto y todas sus presentaciones eliminados con éxito');
+        });
+    }
+
+    private function getPublicIdFromUrl($url)
+    {
+        // Esta lógica extrae el nombre del archivo de la URL de Cloudinary
+        $path = parse_url($url, PHP_URL_PATH);
+        $segments = explode('/', $path);
+        $lastSegment = end($segments);
+        return pathinfo($lastSegment, PATHINFO_FILENAME);
+    }
+
+    public function destroyVariant(\App\Models\ProductVariant $variant)
+    {
+        return DB::transaction(function () use ($variant) {
+            // 1. Limpiamos las relaciones multimedia de esta variante específica
+            foreach ($variant->multimedia as $media) {
+                $variant->multimedia()->detach($media->id);
+                $media->delete(); 
+            }
+
+            // 2. Borrado físico de la variante en MariaDB
+            $variant->delete();
+
+            return back()->with('message', 'Presentación eliminada correctamente');
+        });
+    }
 }
+

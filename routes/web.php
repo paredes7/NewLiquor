@@ -87,6 +87,22 @@ Route::prefix('admin')->group(function () {
         //para poder eliminar una categoria
         Route::delete('/admin/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
+
+        // routes/web.php
+        Route::get('/admin/products', [ProductController::class, 'adminIndex'])->name('admin.products.index');
+        // para poder guardar los cambios de modo editar de las variantes
+        Route::put('/admin/products/{id}', [ProductController::class, 'update'])->name('admin.products.update');
+        // para poder guardar un nuevo producto (sin variante)
+        Route::post('/admin/products', [ProductController::class, 'store'])->name('admin.products.store');
+        // agregar una variante de un producto
+        Route::post('/admin/products/add-variant', [ProductController::class, 'addVariant'])->name('admin.variants.store');
+        // eliminar un producto con sus variantes
+        Route::delete('/admin/products/{product}', [ProductController::class, 'destroy'])->name('admin.products.destroy');
+        // elimianr una variabte de un producto
+        Route::delete('/admin/variants/{variant}', [ProductController::class, 'destroyVariant'])->name('admin.variants.destroy');
+
+
+
         Route::get('/dashboard', [AdminControllerDashboard::class, 'index']);
 
 

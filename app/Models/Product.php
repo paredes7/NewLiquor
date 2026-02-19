@@ -11,6 +11,7 @@ class Product extends Model
     protected $fillable = [
         'category_id',
         'name',
+        'slug',
         'alcohol_content',
         'brand',
         'price',
@@ -26,19 +27,12 @@ class Product extends Model
         // 'peso' => 'decimal:2' // Comentado porque peso puede contener texto
     ];
 
-    public function category()
-    {
-        return $this->belongsTo(Category::class);
+    public function category() {
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
-    public function variants()
-    {
-        return $this->hasMany(ProductVariant::class);
-    }
-
-    public function multimedia()
-    {
-        return $this->hasMany(ProductMultimedia::class);
+    public function variants() {
+        return $this->hasMany(ProductVariant::class, 'product_id');
     }
 
     public function caracteristicas()
@@ -63,4 +57,8 @@ class Product extends Model
         return $this->belongsToMany(Anuncio::class, 'product_anuncios', 'product_id', 'anuncio_id')
                     ->withTimestamps();
     }
+
+    
+
+    
 }

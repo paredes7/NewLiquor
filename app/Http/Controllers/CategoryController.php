@@ -17,7 +17,7 @@ class CategoryController extends Controller
     {
         return Inertia::render('Admin/Catalog', [
             'categories' => Category::all(), // El camión que trae todo de la BD
-            'products'   => \App\Models\Product::with(['category', 'variants', 'multimedia'])->get()
+            'products' => \App\Models\Product::with(['category', 'variants.multimedia'])->get()
         ]);
     }
 

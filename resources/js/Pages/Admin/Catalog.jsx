@@ -3,8 +3,9 @@ import { Head } from "@inertiajs/react";
 import AdminHeader from "@/Components/admin/AdminHeader.jsx";
 // Importamos el componente de gestión que crearemos a continuación
 import CategoryManager from "@/Components/admin/Categorias/CategoryManager.jsx";
+import ProductAdminManager from "@/Components/admin/Products/ProductAdminManager";
 
-export default function Catalog({ categories = [] }) {
+export default function Catalog({ categories = [], products = [] }) {
     const [activeTab, setActiveTab] = useState("categories");
 
     return (
@@ -44,10 +45,9 @@ export default function Catalog({ categories = [] }) {
                 {activeTab === "categories" ? (
                     <CategoryManager categories={categories} />
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[2.5rem] border border-dashed border-gray-200">
-                        <span className="text-4xl mb-4">🚀</span>
-                        <h2 className="text-xl font-bold text-gray-800">Products Section</h2>
-                        <p className="text-gray-400">Pronto diseñaremos la gestión de inventario aquí.</p>
+                    /* Solo dejamos el Manager real, eliminando el div del cohete */
+                    <div className="mt-8">
+                        <ProductAdminManager products={products} categories={categories} />
                     </div>
                 )}
             </main>
