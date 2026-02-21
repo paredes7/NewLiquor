@@ -58,10 +58,11 @@ export default function Pagination({ links }) {
                         whileTap={{ scale: 0.95 }}
                     >
                         <Link
-                            key={key} //clave única
-                            href={link.url} // Enlace de paginación sirve para navegar
-                            preserveScroll // Evita que la página salte al inicio al cambiar
-                            only={["product", "totalProducts"]} // Optimiza la carga solo de datos necesarios
+                            key={key}
+                            href={link.url}
+                            preserveScroll
+                            // ELIMINAMOS 'only' para que Inertia refresque todos los props de la página
+                            // Esto asegura que 'product' se actualice sin importar fallos de nombres
                             className={`px-4 py-2 text-sm transition-all duration-200 rounded-sm ${
                                 link.active
                                     ? "text-black font-bold"

@@ -19,7 +19,14 @@ export default function InventoryTab({ variants, onVariantChange, onImageClick }
                     </div>
                     
                     {/* Volumen */}
-                    <span className="text-black w-20 text-left font-bold">{v.volume}</span>
+                    <div className="w-20">
+                        <input 
+                            type="text" 
+                            value={v.volume || ''} 
+                            onChange={(e) => onVariantChange(index, 'volume', e.target.value)}
+                            className="w-full p-2 bg-white rounded-lg border-none text-left text-black font-bold" 
+                        />
+                    </div>
                     
                     {/* Precio con coma visual */}
                     <div className="w-32">

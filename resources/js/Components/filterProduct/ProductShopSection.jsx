@@ -11,8 +11,14 @@ export default function ProductShopSection({
     filtersData,
     totalProducts,
 }) {
-    const items = product?.data || [];
-   const paginationLinks = product?.meta?.links || product?.links || [];
+    const items = Array.isArray(product) ? product : (product?.data || []);
+    const paginationLinks = product?.meta?.links || product?.links || [];
+    
+    // --- AÑADE ESTOS LOGS AQUÍ ---
+    console.log("1. Objeto 'product' completo recibido:", product);
+    console.log("2. 'items' extraídos para el map:", items);
+    console.log("3. Cantidad de productos encontrados:", items.length);
+
     return (
         <section className="bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

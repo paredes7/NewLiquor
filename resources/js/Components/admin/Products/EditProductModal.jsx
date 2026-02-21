@@ -93,7 +93,8 @@ export default function ProductEditModal({ isOpen, onClose, product }) {
             // Convertimos coma a punto para la base de datos DECIMAL
             data.append(`variants[${index}][price]`, String(v.price).replace(',', '.'));
             data.append(`variants[${index}][stock]`, v.stock);
-            
+            data.append(`variants[${index}][volume]`, v.volume || '');
+
             // Si el usuario seleccionó una foto nueva para esta variante, la adjuntamos
             if (v.newFile) {
                 data.append(`variants[${index}][newFile]`, v.newFile);

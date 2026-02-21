@@ -2,24 +2,40 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ProductVariant extends Model
 {
+    protected $table = 'product_variants';
+
     protected $fillable = [
         'sku',
         'product_id',
-        'volume',      
+        'volume',  
         'price',       
         'stock',     
         'available',  
-        'image_variant_url' 
+        // Eliminamos 'image_variant_url' porque ahora usas la tabla 'variant_multimedia'
     ];
 
-    public function product() {
+    protected $casts = [
+        'available' => 'boolean',
+        'price' => 'decimal:2',
+        'stock' => 'integer',
+    ];
+
+    /**
+     * Relación inversa con el producto maestro
+     */
+    public function product(): BelongsTo {
         return $this->belongsTo(Product::class, 'product_id');
     }
 
-    public function values()
+    /**
+     * Relación Muchos a Muchos con Atributos (ej: Color, Tamaño)
+     */
+    public function values(): BelongsToMany
     {
         return $this->belongsToMany(
             ProductAttributeValue::class,
@@ -29,8 +45,10 @@ class ProductVariant extends Model
         );
     }
     
-    public function multimedia() {
-        // Relación Muchos a Muchos usando la tabla intermedia variant_multimedia
+    /**
+     * Relación Muchos a Muchos con Multimedia a través de la tabla intermedia
+     */
+    public function multimedia(): BelongsToMany {
         return $this->belongsToMany(
             ProductMultimedia::class, 
             'variant_multimedia', 

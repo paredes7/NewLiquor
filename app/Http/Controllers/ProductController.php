@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductAttribute;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use App\Models\FeaturedProduct;
 use App\Http\Resources\FeaturedProductResource;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Intervention\Image\Laravel\Facades\Image;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+
 
 class ProductController extends Controller
 {
@@ -29,22 +31,31 @@ class ProductController extends Controller
      */
     private function getFeaturedProducts()
     {
+        // 1. Obtener productos destacados configurados manualmente
         $featuredProducts = FeaturedProduct::active()
             ->with([
-                'product.multimedia',
-                'product.variants.values.attribute',
-                'variant.values.attribute' // <--- Cargamos la variante específica destacada
+                // Cambiamos la ruta: Multimedia ahora se cuelga de las variantes
+                'product.variants.multimedia', 
+                'product.category',
+                'variant.multimedia' // Variante específica destacada con su imagen
             ])
             ->get();
+
         if ($featuredProducts->count() < 6) {
-            // si hay menos de 6 productos destacados, rellenamos con productos aleatorios disponibles
             $necesidad = 6 - $featuredProducts->count();
             $existingProductIds = $featuredProducts->pluck('product_id')->toArray();
 
-            // Obtener productos adicionales que no estén ya en los destacados
-            $additionalProducts = Product::where('available', 1)
+            // 2. Rellenar con productos aleatorios que tengan variantes disponibles
+            $additionalProducts = Product::whereHas('variants', function ($q) {
+                    $q->where('available', 1); // Filtro correcto en la tabla product_variant
+                })
                 ->whereNotIn('id', $existingProductIds)
-                ->with(['category', 'multimedia', 'variants.values.attribute'])
+                ->with([
+                    'category', 
+                    'variants' => function($q) {
+                        $q->where('available', 1)->with('multimedia'); // Traemos la foto de la variante
+                    }
+                ])
                 ->inRandomOrder()
                 ->take($necesidad)
                 ->get();
@@ -73,51 +84,48 @@ class ProductController extends Controller
     public function search(Request $request)
     {
         $texto = $request->input('search');
-        Log::info("--- Nueva Búsqueda: " . $texto . " ---");
-        // 1. Buscamos todas las categorías que coincidan con el texto
+
+        // --- PARTE 1: Identificación de Categorías ---
         $matchedCategories = Category::where('name', 'LIKE', "%{$texto}%")->get();
         
-        // 2. FILTRADO ESTRICTO:
-        // Si entre lo que encontramos hay subcategorías (tienen parent_id), 
-        // nos quedamos SOLO con ellas para no mostrar el padre.
+        // Si buscó una subcategoría (tiene padre), nos enfocamos en ella
         $subCategories = $matchedCategories->filter(fn($cat) => !is_null($cat->parent_id));
         
         if ($subCategories->isNotEmpty()) {
-            Log::info("Entró al IF: Se detectaron subcategorías.");
-            // Caso: Buscaste "Vino Tinto" -> Solo obtenemos IDs de las subcategorías encontradas
             $allRelevantIds = $subCategories->pluck('id')->toArray();
         } else {
-            Log::info("Entró al IF: Se detectaron categoria.");
-            // Caso: Buscaste "Vino" (Padre) -> Obtenemos el ID del padre y sus hijos
+            // Si buscó categoría padre, incluimos a todos sus hijos
             $parentIds = $matchedCategories->pluck('id')->toArray();
             $childIds = Category::whereIn('parent_id', $parentIds)->pluck('id')->toArray();
             $allRelevantIds = array_unique(array_merge($parentIds, $childIds));
         }
-        Log::info("Contenido de allRelevantIds2:", $allRelevantIds);
 
-        // 3. Consulta de Productos (Inclusiva con el nombre del producto)
-        $products = Product::with(['variants.values', 'multimedia', 'category'])
-        ->where(function($q) use ($texto, $allRelevantIds) {
-            
-            if (!empty($allRelevantIds)) {
-                // LÓGICA DE FILTRO DIRECTO:
-                // Si el usuario buscó "Vino Tinto" y encontramos su ID (23),
-                // traemos TODOS los productos que tengan category_id = 23.
-                // Ignoramos el "LIKE" del nombre para que no entren productos de "Vino" (Padre).
-                $q->whereIn('category_id', $allRelevantIds);
-            } else {
-                // LÓGICA DE COINCIDENCIAS (Solo si no es categoría):
-                // Si el texto no coincide con ninguna categoría (ej: "Malbec" o "Absolut"),
-                // entonces buscamos por nombre o marca.
-                $q->where('name', 'LIKE', "%{$texto}%")
-                ->orWhere('brand', 'LIKE', "%{$texto}%");
-            }
-        })
-        ->get();
-        Log::info("Productos encontrados:", $products->pluck('name')->toArray());
-        // 4. Agrupamos para la vista
-        $groupedResults = $products->groupBy(function($item) {
-            return $item->category->name ?? 'Resultados Generales';
+        // --- PARTE 2: Búsqueda de Variantes (La tabla product_variants) ---
+        $variants = ProductVariant::with(['product.category', 'multimedia'])
+            ->where('available', 1)
+            ->where(function($q) use ($texto, $allRelevantIds) {
+                
+                // Prioridad 1 & 2: Categorías y Subcategorías 
+                if (!empty($allRelevantIds)) {
+                    $q->whereHas('product', function($pq) use ($allRelevantIds) {
+                        $pq->whereIn('category_id', $allRelevantIds);
+                    });
+                } 
+                
+                // Prioridad 3: Coincidencia por texto (ej: "Black") 
+                $q->orWhereHas('product', function($pq) use ($texto) {
+                    $pq->where('name', 'LIKE', "%{$texto}%")
+                    ->orWhere('brand', 'LIKE', "%{$texto}%");
+                })
+                ->orWhere('sku', 'LIKE', "%{$texto}%")
+                ->orWhere('volume', 'LIKE', "%{$texto}%");
+            })
+            ->get();
+
+        // --- PARTE 3: Agrupación ---
+        $groupedResults = $variants->groupBy(function($variant) {
+            // Agrupamos por el nombre de la categoría del producto padre
+            return $variant->product->category->name ?? 'General';
         });
 
         return Inertia::render('ResultPage', [
@@ -131,29 +139,40 @@ class ProductController extends Controller
         $search = $request->query('search', '');
         $filters = $request->except(['search', 'page']);
 
-        // 1. Base de la Query con Eager Loading
-        $queryProducts = Product::with(['variants.values.attribute', 'multimedia'])
-            ->where('available', 1);
+        // 1. Base de la Query con Eager Loading anidado
+        $queryProducts = Product::with([
+            'variants' => function($query) {
+                $query->where('available', 1) 
+                    ->with('multimedia');    
+            }, 
+            'category'
+        ])
+        ->whereHas('variants', function ($q) { 
+            $q->where('available', 1); 
+        });
 
-        // 2. Filtro por búsqueda (Nombre de producto o nombre de variante)
+        // 2. Filtro por búsqueda (Nombre del producto o SKU de la variante)
         if ($search) {
             $queryProducts->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%$search%")
-                    ->orWhereHas('variants', fn($v) => $v->where('name', 'like', "%$search%"));
+                    ->orWhereHas('variants', function($v) use ($search) {
+                        $v->where('sku', 'like', "%$search%") // Búsqueda por SKU
+                        ->orWhere('volumen', 'like', "%$search%"); // Búsqueda por volumen
+                    });
             });
         }
 
-        // 3. Filtros dinámicos por Atributos
+        // 3. Filtros dinámicos (Ej: por volumen o precio)
         foreach ($filters as $key => $value) {
             if ($value) {
-                $queryProducts->whereHas('variants.values', function ($q) use ($key, $value) {
-                    $q->where('value', $value)
-                        ->whereHas('attribute', fn($attrQ) => $attrQ->where('name', $key));
+                $queryProducts->whereHas('variants', function ($q) use ($key, $value) {
+                    // Ajustamos para que coincida con las columnas de products_variants
+                    $q->where($key, $value); 
                 });
             }
         }
 
-
+        // Paginación final
         $paginatedProducts = $queryProducts->paginate($perPage)->withQueryString();
 
         return $paginatedProducts;
@@ -189,7 +208,11 @@ class ProductController extends Controller
 
         // Obtener productos filtrados y paginados
         $productCrudo = $this->getFilteredProducts($request, $perPage);
-        $product = FeaturedProductResource::collection($productCrudo);
+        $product = FeaturedProductResource::collection($productCrudo)->additional([
+            'meta' => [
+                'total' => $productCrudo->total(),
+            ]
+        ]);
 
         return Inertia::render('Welcome', [
             'categories'       => $allCategories->forPage(1, $perPage)->values()->all(),
@@ -297,41 +320,36 @@ class ProductController extends Controller
     public function getCategoryDetails(Request $request, $slug)
     {
         $search = $request->query('search', '');
-        $page = 1;
-        $perPage = 8;
-
-        // Obtener todas las categorías principales
+        
+        // 1. Cargamos las categorías de forma eficiente
         $allCategories = Category::whereNull('parent_id')
-            ->with([
-                'children',
-                'children.products.variants.values.attribute',
-                'children.products.multimedia',
-                'products.variants.values.attribute',
-                'products.multimedia'
-            ])
+            ->with(['children'])
             ->get()
             ->map(function ($category) use ($search) {
-                // Productos de la categoría principal
-                $categoryProducts = $category->products()
+                
+                // 2. Traemos VARIANTES directamente (no productos) para la categoría padre
+                $categoryVariants = ProductVariant::with(['product', 'multimedia'])
                     ->where('available', 1)
-                    ->when($search, fn($q) => $q->where('name', 'like', "%$search%"))
-                    ->with(['variants.values.attribute', 'multimedia'])
-                    ->get();
+                    ->whereHas('product', function($q) use ($category, $search) {
+                        $q->where('category_id', $category->id)
+                        ->when($search, fn($sq) => $sq->where('name', 'like', "%$search%"));
+                    })->get();
 
-                // Subcategorías con sus productos
+                // 3. Subcategorías con sus VARIANTES
                 $children = $category->children->map(function ($child) use ($search) {
-                    $childProducts = $child->products()
+                    $childVariants = ProductVariant::with(['product', 'multimedia'])
                         ->where('available', 1)
-                        ->when($search, fn($q) => $q->where('name', 'like', "%$search%"))
-                        ->with(['variants.values.attribute', 'multimedia'])
-                        ->get();
+                        ->whereHas('product', function($q) use ($child, $search) {
+                            $q->where('category_id', $child->id)
+                            ->when($search, fn($sq) => $sq->where('name', 'like', "%$search%"));
+                        })->get();
 
                     return [
                         'id' => $child->id,
                         'name' => $child->name,
                         'slug' => $child->slug,
                         'description' => $child->description,
-                        'products' => $childProducts,
+                        'products' => $childVariants, // Ahora son variantes listas para ProductCard
                     ];
                 });
 
@@ -339,26 +357,18 @@ class ProductController extends Controller
                     'id' => $category->id,
                     'name' => $category->name,
                     'slug' => $category->slug,
-                    'description' => $category->description,
-                    'products' => $categoryProducts,
+                    'image' => $category->image, // Aseguramos que viaje la imagen
+                    'products' => $categoryVariants,
                     'children' => $children,
                 ];
             });
 
-        // Buscar la categoría seleccionada por slug
         $selectedCategory = $allCategories->firstWhere('slug', $slug);
 
-        // Paginación
-        $categories = $allCategories->forPage($page, $perPage)->values()->all();
-        $hasMore = $allCategories->count() > $perPage;
-
-        // Retornamos igual que index pero con selectedCategory
         return Inertia::render('Products/CategoriesPage', [
-            'categories' => $categories,
+            'categories' => $allCategories,
             'selectedCategory' => $selectedCategory,
-            'search' => $search,    
-            'page' => $page,
-            'hasMore' => $hasMore,
+            'search' => $search,
         ]);
     }
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model
@@ -14,12 +15,8 @@ class Product extends Model
         'slug',
         'alcohol_content',
         'brand',
-        'price',
-        'stock',
-        'volume',
         'description',
         'longDescription',
-        'available',
     ];
 
     protected $casts = [

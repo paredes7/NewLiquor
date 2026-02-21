@@ -30,29 +30,34 @@ export default function ResultPage({ search, groupedResults }) {
                 </h1>
 
                 {/* --- LISTADO POR CATEGORÍAS --- */}
-                {categoriesFound.length > 0 ? (
-                    categoriesFound.map((catName) => (
-                        <div key={catName} className="mb-16 animate-fade-in">
-                            {/* Título de la Categoría o Subcategoría encontrada */}
+                {categoriesFound.map((catKey) => {
+                    // Intentamos obtener solo el nombre para el título
+                    let displayTitle = catKey;
+                    try {
+                        // Si catKey es un JSON (como se ve en tu imagen), extraemos el 'name'
+                        const catData = JSON.parse(catKey);
+                        displayTitle = catData.name;
+                    } catch (e) {
+                        // Si no es JSON, lo dejamos como está
+                        displayTitle = catKey;
+                    }
+
+                    return (
+                        <div key={catKey} className="mb-16 animate-fade-in">
                             <h2 className="text-xl font-bold text-gray-700 mb-6 flex items-center gap-2">
                                 <span className="w-2 h-6 bg-orange-500 rounded-full"></span>
-                                Productos en "{catName}"
+                                Productos en "{displayTitle}"
                             </h2>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                                {groupedResults[catName].map((product) => (
-                                    <ProductCard key={product.id} product={product} />
+                                {groupedResults[catKey].map((variant) => (
+                                    // Pasamos la variante a tu nuevo ProductCard 
+                                    <ProductCard key={variant.id} product={variant} />
                                 ))}
                             </div>
                         </div>
-                    ))
-                ) : (
-                    <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-                        <p className="text-gray-500 text-xl font-medium">
-                            No hay coincidencias para "{search}". 🍾
-                        </p>
-                    </div>
-                )}
+                    );
+                })}
             </div>
         </Layout>
     );

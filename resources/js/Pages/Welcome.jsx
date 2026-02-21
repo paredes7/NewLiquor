@@ -28,27 +28,21 @@ export default function Welcome({
     return (
         <Layout title="Inicio">
             <HomeSearch />
-
+                <CategoriesGrid categories={categories} />
             {/** <Banner img="https://res.cloudinary.com/dnbklbswg/image/upload/v1767755747/banner_yfcfdc.jpg" />
              *  <WelcomeSection />
              */}
-
-            <CategoriesGrid categories={categories} />
-            <EventCarousel eventos={eventos} />
-
-            <ProductsCarousel
-                title="Lo más destacado de hoy"
-                subtitle="Nuestras mejores recomendaciones sobre destilados espectaculares."
-                products={featuredProducts.data || featuredProducts}
-            />
-
-            {/* Así de simple lo pones ahora */}
-            <ProductShopSection
-                product={product}
-                filtersData={filtersData || []}
-                totalProducts={totalProducts}
-            />
-            
+                <EventCarousel eventos={eventos} />
+                <ProductsCarousel
+                    title="Lo más destacado de hoy"
+                    subtitle="Nuestras mejores recomendaciones sobre destilados espectaculares."
+                    products={featuredProducts.data || featuredProducts}
+                />
+                <ProductShopSection
+                    product={product}
+                    filtersData={filtersData || []}
+                    totalProducts={totalProducts}
+                />
         </Layout>
     );
 }

@@ -1,3 +1,4 @@
+import { router } from "@inertiajs/react";
 import { useState } from "react";
 import { 
     Edit, Trash2, ChevronDown, Package, 
@@ -11,27 +12,26 @@ import DeleteVariantModal from './DeleteVariantModal';
 export default function ProductAdminCard({ product, onEdit, onDelete }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    
+    // --- ESTADOS PARA VARIANTES ---
+    const [isDelVariantModalOpen, setIsDelVariantModalOpen] = useState(false);
+    const [variantToDelete, setVariantToDelete] = useState(null);
 
-    // Calculamos el stock total sumando todas las variantes de la base de datos
+    // Calculamos el stock total sumando todas las variantes
     const totalStock = product.variants?.reduce((acc, v) => acc + (v.stock || 0), 0) || 0;
 
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
-    const [isDelVariantModalOpen, setIsDelVariantModalOpen] = useState(false);
-    const [selectedVariant, setSelectedVariant] = useState(null);
-
+    // Función que ejecuta la eliminación física en MariaDB
     const handleConfirmVariantDelete = () => {
-        if (selectedVariant) {
-            router.delete(route('admin.variants.destroy', selectedVariant.id), {
+        if (variantToDelete) {
+            router.delete(route('admin.variants.destroy', variantToDelete.id), {
                 preserveScroll: true,
-                onSuccess: () => setIsDelVariantModalOpen(false)
+                onSuccess: () => {
+                    setIsDelVariantModalOpen(false);
+                    setVariantToDelete(null);
+                }
             });
         }
-    };
-
-    const handleConfirmDelete = () => {
-        onDelete(product.id); // Llama a la función de eliminar en el catálogo
-        setIsDeleteModalOpen(false);
     };
 
     return (
@@ -63,9 +63,10 @@ export default function ProductAdminCard({ product, onEdit, onDelete }) {
                         >
                             <Edit size={18} />
                         </button>
+                        {/* Botón para eliminar el producto completo */}
                         <button 
-                            onClick={() => setIsDeleteModalOpen(true)} // Esto activa el modal
-                            className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                            onClick={() => setIsDeleteModalOpen(true)}
+                            className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                         >
                             <Trash2 size={18} />
                         </button>
@@ -94,7 +95,6 @@ export default function ProductAdminCard({ product, onEdit, onDelete }) {
                     </div>
                 </div>
 
-                {/* Botón para expandir variantes */}
                 <button 
                     onClick={() => setIsExpanded(!isExpanded)}
                     className="w-full mt-4 py-2 flex items-center justify-center gap-2 text-xs font-bold text-gray-400 hover:text-indigo-600 hover:bg-gray-50 rounded-xl transition-all"
@@ -106,7 +106,7 @@ export default function ProductAdminCard({ product, onEdit, onDelete }) {
                 </button>
             </div>
 
-            {/* Panel de Variantes (Detalle) */}
+            {/* Panel de Variantes */}
             <AnimatePresence>
                 {isExpanded && (
                     <motion.div 
@@ -131,11 +131,11 @@ export default function ProductAdminCard({ product, onEdit, onDelete }) {
                                             <p className="text-[10px] font-bold text-green-500">{variant.stock} en stock</p>
                                         </div>
 
-                                        {/* BOTÓN DE ELIMINAR VARIANTE */}
+                                        {/* CORRECCIÓN: Botón de eliminar variante */}
                                         <button 
                                             onClick={() => {
-                                                setSelectedVariant(variant); // Identificamos cuál variante es
-                                                setIsDelVariantModalOpen(true); // Abrimos el modal elegante
+                                                setVariantToDelete(variant); 
+                                                setIsDelVariantModalOpen(true);
                                             }}
                                             className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover/variant:opacity-100"
                                         >
@@ -147,38 +147,39 @@ export default function ProductAdminCard({ product, onEdit, onDelete }) {
                                 </div>
                             ))}
 
-                            {/* --- CONEXIÓN CON EL NUEVO COMPONENTE --- */}
                             <button 
                                 onClick={() => setIsVariantModalOpen(true)}
                                 className="w-full py-3 border-2 border-dashed border-gray-200 rounded-2xl text-gray-400 font-bold hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-600 transition-all"
                             >
                                 + Nueva Presentación
                             </button>
-                            <AddVariantRow 
-                                isOpen={isVariantModalOpen} 
-                                onClose={() => setIsVariantModalOpen(false)} 
-                                product={product} 
-                            />
-
-                            
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Modales */}
+            <AddVariantRow 
+                isOpen={isVariantModalOpen} 
+                onClose={() => setIsVariantModalOpen(false)} 
+                product={product} 
+            />
+
             <DeleteProductModal 
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={() => {
-                    onDelete(product.id); // Ejecuta la función de eliminar en la DB
+                    onDelete(product.id);
                     setIsDeleteModalOpen(false);
                 }}
                 productName={product.name}
             />
+
             <DeleteVariantModal 
                 isOpen={isDelVariantModalOpen}
                 onClose={() => setIsDelVariantModalOpen(false)}
                 onConfirm={handleConfirmVariantDelete}
-                variantVolume={selectedVariant?.volume} // Pasamos el volumen para el mensaje
+                variantVolume={variantToDelete?.volume}
             />
         </div>
     );
