@@ -1,132 +1,49 @@
-import React, { useState } from "react";
-import { ChevronDown, Check } from "lucide-react";
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 
-/**
-* FilterSelect Profesional
- * 
- */
-
-
-
-export default function FilterSelect({
-    label,
-    options = [],
-    value = "",
-    onChange,
-    placeholder = "Seleccionar...",
-    defaultOpen = false,
-}) {
-    const [isOpen, setIsOpen] = useState(defaultOpen);
-
-    const handleOptionClick = (optionValue) => {
-        if (value === optionValue) {
-            onChange(""); // Deseleccionar si ya está seleccionado
-        } else {
-            onChange(optionValue);
-        }
-    };
-    // Determina si hay un filtro activo para resaltar el encabezado
-    const isActive = value !== "";
+export default function FilterSelect({ label, options, value, onChange, placeholder }) {
+    const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <div className="py-4 border-b border-gray-100 last:border-0">
-            {/* ENCABEZADO / BOTÓN DE CONTROL */}
-            <button
-                type="button"
-                aria-expanded={isOpen}
+        <div className="py-3">
+            <button 
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex w-full items-center justify-between group transition-all duration-300"
+                className="flex items-center justify-between w-full text-left"
             >
-                <div className="flex items-center gap-3">
-                    <motion.span
-                        animate={{
-                            scale: isOpen || isActive ? "#000" : "#9ca3af",
-                        }}
-                        className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-300 ${
-                            isOpen || isActive
-                                ? "text-black"
-                                : "text-gray-400 group-hover:text-gray-600"
-                        }`}
-                    >
-                        {label}
-                    </motion.span>
-
-                    {/* 2. EL PUNTO DORADO: Se muestra solo si isActive es true */}
-                    <AnimatePresence>
-                        {isActive && (
-                            <motion.div
-                                initial={{ scale: 0, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                exit={{ scale: 0, opacity: 0 }}
-                                className="w-2 h-2 rounded-full bg-red-600" // Color dorado (Gold)
-                                title="Filtro activo"
-                            />
-                        )}
-                    </AnimatePresence>
-                </div>
-
-                <motion.div
-                    animate={{ rotate: isOpen ? 180 : 0 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                >
-                    <ChevronDown
-                        size={16}
-                        className={`transition-colors ${isOpen ? "text-black" : "text-gray-300"}`}
-                    />
-                </motion.div>
+                <span className="text-[11px] font-black uppercase tracking-[0.2em] text-darkGray">
+                    {label}
+                </span>
+                <ChevronDown size={14} className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
             </button>
 
-            {/* LISTA DE VALORES DIRECTA */}
             <AnimatePresence>
                 {isOpen && (
-                    <motion.div
+                    <motion.div 
                         initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
+                        animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{
-                            duration: 0.3,
-                            ease: [0.04, 0.62, 0.23, 0.98],
-                        }}
                         className="overflow-hidden"
                     >
-                        <div className="overflow-hidden">
-                            <div className="flex flex-col gap-1">
-                                {/* Mapeo de opciones reales */}
-                                {options.map((option, index) => (
-                                    <motion.button
-                                        key={`${label}-${option.value}-${index}`} //clave única
-                                        initial={{ x: -10, opacity: 0 }}
-                                        animate={{ x: 0, opacity: 1 }}
-                                        transition={{ delay: index * 0.03 }}
-                                        onClick={() =>
-                                            handleOptionClick(option.value)
-                                        } //maneja selección
-                                        whileHover={{ x: 5 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className={`flex items-center justify-between px-3 py-2 text-[11px] rounded-sm transition-colors ${
-                                            value === option.value
-                                                ? "bg-red-50 text-red-600 font-bold"
-                                                : "text-gray-500 hover:bg-gray-100 hover:text-red-400"
-                                        }`} //estilos condicionales
-                                    >
-                                        <span className="uppercase tracking-wider">
-                                            {option.label}
-                                        </span>
-                                        {value === option.value && (
-                                            <motion.div
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                            >
-                                                <Check
-                                                    size={12}
-                                                    strokeWidth={3}
-                                                />
-                                            </motion.div>
-                                        )}
-                                    </motion.button>
-                                ))}
-                            </div>
+                        <div className="flex flex-col gap-3 pt-4 pb-2 pl-2">
+                            {/* Opción por defecto (limpiar este filtro) */}
+                            <button
+                                onClick={() => onChange("")}
+                                className={`text-left text-[10px] uppercase tracking-widest transition-all ${!value ? 'text-turquoise font-black' : 'text-gray-400 hover:text-darkGray'}`}
+                            >
+                                {placeholder}
+                            </button>
+
+                            {/* Mapeo de categorías reales de la base de datos */}
+                            {options.map((option) => (
+                                <button
+                                    key={option.value}
+                                    onClick={() => onChange(option.value)}
+                                    className={`text-left text-[10px] uppercase tracking-widest transition-all hover:pl-1 ${value === option.value ? 'text-turquoise font-black' : 'text-gray-500 hover:text-darkGray'}`}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
                         </div>
                     </motion.div>
                 )}

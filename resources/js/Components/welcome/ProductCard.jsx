@@ -2,111 +2,131 @@ import React from "react";
 import { router } from "@inertiajs/react";
 import { motion } from "framer-motion";
 
-export default function ProductCard({ product: variant }) {
-    // 1. Validación de seguridad para evitar el crash inicial
-    if (!variant) return null;
+export default function ProductCard({ product: data }) {
+    if (!data) return null;
 
-    // 2. Lógica Híbrida: Si existe variant.product la usamos (Buscador), 
-    // si no, usamos variant directamente (Home/Resources).
-    const pData = variant.product || variant;
+    // --- NORMALIZACIÓN DE DATOS ---
+    // Detectamos si es Variante (Search) o Producto (Home)
+    const isVariant = !!data.product; 
+    const variant = isVariant ? data : (data.variants?.[0] || data);
+    const pData = isVariant ? data.product : data;
 
-    // 3. Definición de variables con fallback (soporta ambos formatos)
-    const productName = pData.name || "Producto sin nombre";
-    const brandName = pData.brand || "Importación Selecta";
+    // --- EXTRACCIÓN DE DATOS ---
+    const productName = pData.name || "Destilado Premium";
+    // Buscamos el volumen específicamente en la variante
+    const volume = variant.volume || ""; 
+    const fullName = `${productName} ${volume}`.trim();
+    const brandName = pData.brand || "Bodega Selecta";
     
-    // Soporta tanto 'alcohol_content' (DB) como 'content_alcohol' (Resource)
-    const alcoholContent = pData.alcohol_content || pData.content_alcohol || "40% ABV";
-    
-    // Volumen y Precio (normalmente están en la raíz de la variante)
-    const displayVolume = variant.volume || "S/V";
-    const price = Number(variant.price || 0).toFixed(2);
-    const fullName = `${productName} ${displayVolume}`;
-    
-    // Lógica de Stock
+    // Precio y Stock
+    const price = Number(variant.price || 0).toLocaleString('es-BO', { minimumFractionDigits: 2 });
     const isOutOfStock = (variant.stock || 0) <= 0;
     
-    // 4. Mapeo de Multimedia (Soporta main_image del Resource o array multimedia)
-    const mainImage = variant.main_image 
-        || variant.multimedia?.[0]?.url 
-        || "https://via.placeholder.com/600x800";
-    
-    // Categoría: Maneja si es un objeto o un string directo
-    const categoryName = (typeof pData.category === 'object' ? pData.category?.name : pData.category) || "Licores";
+    // Imagen con lógica de Cloudinary/Storage
+    const rawImage = data.main_image || variant.main_image || variant.multimedia?.[0]?.url || pData.multimedia?.[0]?.url;
+
+    const mainImage = rawImage 
+        ? (rawImage.startsWith('http') ? rawImage : `/storage/${rawImage}`)
+        : "/img/placeholder-bottle.png";
+
+    const categoryName = (typeof pData.category === 'object' ? pData.category?.name : pData.category) || "Licorería";
+
+    const addToCart = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isOutOfStock) return;
+        
+        router.post(route('carrito.add'), { 
+            variant_id: variant.id, 
+            quantity: 1 
+        }, { preserveScroll: true });
+    };
 
     return (
         <motion.div
-            whileHover={{ 
-                scale: 1.02,
-                zIndex: 30, 
-                transition: { duration: 0.3 } 
-            }}
-            className="w-full h-full p-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{ y: -5 }}
+            className="group w-full h-full p-3"
         >
-            <div
-                className={`w-full h-full relative overflow-hidden rounded-3xl shadow-xl border bg-white flex flex-col transition-shadow duration-300
-                    ${isOutOfStock ? "border-gray-300 opacity-75" : "border-gray-200"}
-                `}
-                style={{ fontFamily: "'Playfair Display', serif" }}
-            >
-                {/* Contenedor de Imagen */}
-                <div className="w-full aspect-[4/5] p-4 bg-white border-b border-gray-50 rounded-t-3xl overflow-hidden">
-                    <img
-                        src={mainImage}
-                        alt={fullName}
-                        className="w-full h-full object-contain"
-                    />
-                </div>
-
-                {/* Contenido Textual */}
-                <div className="p-4 flex flex-col gap-2 flex-grow bg-white">
-                    <span className="text-[10px] uppercase italic tracking-[0.2em] text-gray-400 font-bold text-center">
+            <div className={`relative flex flex-col h-full bg-white rounded-[2rem] overflow-hidden transition-all duration-500 shadow-sm hover:shadow-2xl border ${isOutOfStock ? 'grayscale opacity-80' : 'border-gray-100'}`}>
+                
+                {/* Badge de Categoría Flotante */}
+                <div className="absolute top-5 left-5 z-10">
+                    <span className="bg-white backdrop-blur-md text-black text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-gray-500">
                         {categoryName}
                     </span>
+                </div>
 
-                    <h3 className="font-serif italic text-center text-[#a30f0f] text-lg font-bold uppercase tracking-tight leading-tight min-h-[50px] flex items-center justify-center">
+                {/* Contenedor de Imagen (Aspect 4/5 mantenido) */}
+                <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-b from-gray-50 to-white flex items-center justify-center p-6">
+                    <motion.img
+                        whileHover={{ scale: 1.1, rotate: 2 }}
+                        src={mainImage}
+                        alt={fullName}
+                        className="w-full h-full object-contain drop-shadow-2xl"
+                    />
+                    
+                    {isOutOfStock && (
+                        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
+                            <span className="bg-white text-black text-xs font-bold px-4 py-2 rounded-full uppercase tracking-tighter">
+                                Agotado
+                            </span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Información del Producto */}
+                <div className="p-6 flex flex-col flex-grow text-center gap-1">
+                    <p className="text-[10px] text-grayCustom font-poppins uppercase tracking-[3px]">
+                        {brandName}
+                    </p>
+                    
+                    {/* Aquí es donde aparece el Nombre + Volumen corregido */}
+                    <h3 className="font-playfair text-lg font-bold text-darkGray leading-tight min-h-[3rem] flex items-center justify-center">
                         {fullName}
                     </h3>
 
-                    <p className="text-[11px] text-center italic text-gray-500">
-                        {displayVolume} • {alcoholContent}
-                    </p>
+                    <div className="flex items-center justify-center gap-2 my-2">
+                        <span className="h-[1px] w-8 bg-turquoise/30"></span>
+                        <p className="text-[11px] text-turquoise font-bold italic">
+                            {pData.alcohol_content || "40"}% Alc.
+                        </p>
+                        <span className="h-[1px] w-8 bg-turquoise/30"></span>
+                    </div>
 
-                    <h2 className="text-[13px] mb-1 font-medium italic text-gray-900 text-center min-h-[40px] flex items-center justify-center overflow-hidden leading-snug px-2">
-                        {brandName}
-                    </h2>
+                    <div className="flex flex-col items-center gap-1 mb-3">
+                        <p className={`text-[10px] font-bold uppercase tracking-wider ${
+                            variant.stock > 10 ? 'text-green-600' : 'text-orange-500'
+                        }`}>
+                            {isOutOfStock 
+                                ? "Sin existencias" 
+                                : `${variant.stock} unidades disponibles`
+                            }
+                        </p>
+                    </div>
 
-                    <p className="text-xl italic text-center font-extrabold tracking-wide text-red-700">
-                        BOB {price}
-                    </p>
+                    <div className="mt-auto">
+                        <p className="text-2xl font-poppins font-light text-darkGray mb-4">
+                            <span className="text-sm font-bold align-top mr-1">BOB</span>
+                            {price}
+                        </p>
 
-                    {/* Botón de Acción */}
-                    <div className="mt-auto pt-2">
                         <button
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                if (!isOutOfStock) {
-                                    router.post("/cart/add", { variant_id: variant.id || variant.featured_variant_id, quantity: 1 });
-                                }
-                            }}
+                            onClick={addToCart}
                             disabled={isOutOfStock}
-                            className={`w-full py-2.5 px-4 rounded-full font-bold uppercase text-[10px] tracking-widest transition-all duration-300
+                            className={`group/btn relative w-full overflow-hidden py-4 rounded-xl font-poppins text-[10px] font-bold uppercase tracking-[2px] transition-all
                                 ${isOutOfStock 
-                                    ? "bg-gray-400 text-white cursor-not-allowed" 
-                                    : "bg-red-600 hover:bg-red-700 text-white shadow-md hover:shadow-red-500/50 active:scale-95"
+                                    ? "bg-gray-200 text-gray-400 cursor-not-allowed" 
+                                    : "bg-darkGray text-white hover:bg-turquoise shadow-lg active:scale-95"
                                 }`}
                         >
-                            {isOutOfStock ? "Agotado" : "Agregar al carrito"}
+                            <span className="relative z-10">
+                                {isOutOfStock ? "Próximamente" : "Añadir al Carrito"}
+                            </span>
                         </button>
                     </div>
                 </div>
-
-                {/* Badge Agotado */}
-                {isOutOfStock && (
-                    <div className="absolute top-4 right-4 bg-gray-500 text-white text-[9px] font-bold px-3 py-1 rounded-full uppercase z-10">
-                        Sin Stock
-                    </div>
-                )}
             </div>
         </motion.div>
     );

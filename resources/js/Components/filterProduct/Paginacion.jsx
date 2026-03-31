@@ -1,103 +1,52 @@
-//COMPONENTE DE PAGINACIÓN
-//descripción: Componente de paginación para navegar entre páginas de productos, integrado con Inertia.js para mantener el estado y la URL sincronizados.
 import React from "react";
-
 import { Link } from "@inertiajs/react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 export default function Pagination({ links }) {
-    // Si solo hay una página, no mostramos nada
-   if (!links || !Array.isArray(links)) {
-        console.warn("Pagination: links is not a valid array", links);
-        return null;
-    }
-
-    // Cambiamos a 1 para asegurarnos de que se vea si hay al menos una página
-    if (links.length <= 1) return null;
-
-    //variantes para animaciones
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: { staggerChildren: 0.05 },
-        },
-    };
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 10 },
-        visible: { opacity: 1, y: 0 },
-    };
+    if (!links || links.length <= 3) return null; // 3 porque Laravel siempre envía Prev, 1, Next
 
     return (
         <motion.nav
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="flex justify-center items-center gap-1 mt-12 mb-8"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex justify-center items-center gap-1 mt-12 mb-8 flex-wrap"
         >
             {links.map((link, key) => {
-                // Si no hay URL (puntos suspensivos o flechas deshabilitadas)
                 if (link.url === null) {
                     return (
-                        <motion.span
+                        <span
                             key={key}
-                            variants={itemVariants}
-                            className="px-3 py-2 text-gray-400 text-sm"
+                            className="px-3 py-2 text-gray-300 text-xs uppercase font-bold"
                             dangerouslySetInnerHTML={{ __html: link.label }}
                         />
                     );
                 }
 
                 return (
-                    <motion.div
-                        key={key}
-                        variants={itemVariants}
-                        className="relative"
-                        whileHover={{ y: -2 }}
-                        whileTap={{ scale: 0.95 }}
-                    >
+                    <div key={key} className="relative">
                         <Link
-                            key={key}
                             href={link.url}
                             preserveScroll
-                            // ELIMINAMOS 'only' para que Inertia refresque todos los props de la página
-                            // Esto asegura que 'product' se actualice sin importar fallos de nombres
-                            className={`px-4 py-2 text-sm transition-all duration-200 rounded-sm ${
+                            className={`px-4 py-2 text-xs font-black uppercase tracking-widest transition-all duration-300 rounded-lg ${
                                 link.active
-                                    ? "text-black font-bold"
-                                    : "text-gray-500 hover:text-red-600"
+                                    ? "text-darkGray"
+                                    : "text-gray-400 hover:text-turquoise"
                             }`}
                         >
-                            <span
+                            <span 
                                 className="relative z-10"
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                             />
 
-                            {/* Subrayado animado (Layout ID permite que el borde viaje de un número a otro) */}
                             {link.active && (
                                 <motion.div
                                     layoutId="activePaginationBorder"
-                                    className={`absolute -bottom-1 left-0 right-0 h-[2px]    rounded-full  transition-opacity duration-200
-        ${
-            link.active
-                ? "bg-red-700 opacity-100 shadow-[0_1px_6px_rgba(239,68,68,0.35)]"
-                : "opacity-0"
-        }`}
-                                    initial={{ opacity: 0, scaleX: 0.6 }}
-                                    animate={{ opacity: 1, scaleX: 1 }}
-                                    transition={{
-                                        type: "spring",
-                                        stiffness: 220, // más suave
-                                        damping: 28, // sin rebote
-                                        mass: 0.8, // sensación ligera
-                                        opacity: { duration: 0.25 },
-                                    }}
-                                    style={{ originX: 0.5 }}
+                                    className="absolute bottom-0 left-0 right-0 h-[2px] bg-turquoise shadow-[0_2px_8px_rgba(64,224,208,0.4)]"
+                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                 />
                             )}
                         </Link>
-                    </motion.div>
+                    </div>
                 );
             })}
         </motion.nav>

@@ -58,7 +58,7 @@ export default function ProductCarousel({
     }
 
     return (
-        <section className="py-12 px-4 max-w-[1400px] mx-auto overflow-hidden overflow-x-clip relative">
+        <section className="py-12 px-4 bg-[#F5C15B] max-w-[1400px] mx-auto overflow-hidden overflow-x-clip relative">
             {(title || subtitle) && (
                 <div className="text-center mb-6">
                     {title && (
@@ -97,7 +97,7 @@ export default function ProductCarousel({
                 >
                     {products?.map((product, index) => (
                         <div
-                            key={`carousel-item-${product.id}-${index}`}
+                            key={`carousel-item-${product.variant_id}-${index}`}
                             // Ajuste preciso para 5 columnas considerando gap-6 (24px)
                             className={`flex-none w-[90%] ${columnWidths[columns]} snap-start`}
                         >

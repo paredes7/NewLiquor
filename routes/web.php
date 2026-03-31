@@ -40,6 +40,8 @@ Route::get('/Contacto', function () {
 })->name('contacto');
 
 //para clientes
+
+//esta ruta hace ejecutar el buscador para que busque lo que se digite en el buscador 
 Route::get('/buscar', [ProductController::class, 'search'])->name('products.search');
 Route::get('/products/{slug}/{product}', [ProductController::class, 'show'])
     ->where('slug', '.*')  // Acepta cualquier carácter en el slug, incluyendo caracteres especiales
@@ -66,6 +68,10 @@ Route::get('/checkout', function () {
 
 // Endpoint para crear pedido
 Route::post('/orders/store', [PedidosController::class, 'store'])->name('orders.store');
+
+
+// Ruta para alimentar el carrusel 3D
+Route::get('/api/categories-carousel', [CategoryController::class, 'getCarousel']);
 
 
 //para administrador

@@ -2,14 +2,37 @@ import { router } from '@inertiajs/react';
 import SearchBar from "./Search";
 
 export default function HomeSearch() {
+    const normalizeText = (text) => {
+        return text
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "") // Quita tildes
+            .replace(/([^a-z0-9\s])/g, "")   // Quita símbolos (!, @, #, etc.)
+            .trim();
+    };
+
+    const toSingular = (text) => {
+        // Lógica simple para licores: quita la 's' o 'es' al final
+        return text
+            .replace(/es$/i, "")
+            .replace(/s$/i, "");
+    };
+
     const handleSearch = (query) => {
-        // Por ahora solo probamos que capture el texto
-        console.log("Navegando hacia resultados con:", query); // <-- Si ves esto, el problema es el Router o Laravel
-        router.get('/buscar', { search: query });
+        if (!query) return;
+
+        // 2. Aplicamos la limpieza antes de navegar
+        const cleanQuery = normalizeText(query);
+        const singularQuery = toSingular(cleanQuery);
+
+        console.log("Navegando con búsqueda optimizada:", singularQuery); 
+        
+        // Enviamos la versión limpia a Laravel
+        router.get('/buscar', { search: singularQuery });
     };
 
     return (
-        <section className="relative w-full bg-white py-16 md:py-24 px-6 overflow-hidden">
+        <section className="relative w-full bg-[#FFFFBF] py-16 md:py-24 px-6 overflow-hidden">
             <div className="container mx-auto text-center relative z-10">
                 {/* Texto Principal */}
                 <h1 className="text-4xl md:text-6xl font-black text-gray-900 mb-6 leading-tight tracking-tight">

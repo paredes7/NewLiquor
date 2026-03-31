@@ -20,18 +20,27 @@ export default {
             },
 
             colors: {
+                darkGray: '#231f20',
+                grayCustom: '#939191',
+                turquoise: '#01a387',
+                darkTurquoise: '#165a4e',
+            },
 
-                /* Paleta Jhaseft */
-                darkGray: '#231f20',      // Gris oscuro
-                grayCustom: '#939191',    // Gris
-                turquoise: '#01a387',     // Turquesa vivido
-                darkTurquoise: '#165a4e', // Turquesa oscuro
+           
+            animation: {
+                'carousel-3d': 'rotate-3d 20s linear infinite',
+            },
+            keyframes: {
+                'rotate-3d': {
+                    'from': { transform: 'rotateY(0deg)' },
+                    'to': { transform: 'rotateY(360deg)' },
+                }
             },
         },
     },
 
     plugins: [
         forms,
-        animations,
+        animations, 
     ],
 };

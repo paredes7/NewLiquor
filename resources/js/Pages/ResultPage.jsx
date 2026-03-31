@@ -1,13 +1,12 @@
 import Layout from '@/Layouts/MainLayout';
 import ProductCard from '@/Components/welcome/ProductCard';
-import SearchBar from '@/Components/search/Search'; // Importamos tu componente Search
+import ProductCardMobile from '@/Components/welcome/ProductCardMobile'; // Importamos el nuevo
+import SearchBar from '@/Components/search/Search';
 import { router } from '@inertiajs/react';
 
 export default function ResultPage({ search, groupedResults }) {
-    // Convertimos el objeto agrupado en un array para mapear
     const categoriesFound = Object.keys(groupedResults);
 
-    // Lógica para manejar la búsqueda desde esta misma página
     const handleSearch = (query) => {
         router.get('/buscar', { search: query });
     };
@@ -31,14 +30,11 @@ export default function ResultPage({ search, groupedResults }) {
 
                 {/* --- LISTADO POR CATEGORÍAS --- */}
                 {categoriesFound.map((catKey) => {
-                    // Intentamos obtener solo el nombre para el título
                     let displayTitle = catKey;
                     try {
-                        // Si catKey es un JSON (como se ve en tu imagen), extraemos el 'name'
                         const catData = JSON.parse(catKey);
                         displayTitle = catData.name;
                     } catch (e) {
-                        // Si no es JSON, lo dejamos como está
                         displayTitle = catKey;
                     }
 
@@ -49,10 +45,17 @@ export default function ResultPage({ search, groupedResults }) {
                                 Productos en "{displayTitle}"
                             </h2>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                            {/* --- CAMBIO AQUÍ: Mantenemos tu grid pero solo para escritorio --- */}
+                            <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                                 {groupedResults[catKey].map((variant) => (
-                                    // Pasamos la variante a tu nuevo ProductCard 
                                     <ProductCard key={variant.id} product={variant} />
+                                ))}
+                            </div>
+
+                            {/* --- CAMBIO AQUÍ: Lista vertical optimizada solo para móvil --- */}
+                            <div className="flex flex-col md:hidden border border-gray-100 rounded-xl overflow-hidden">
+                                {groupedResults[catKey].map((variant) => (
+                                    <ProductCardMobile key={variant.id} product={variant} />
                                 ))}
                             </div>
                         </div>

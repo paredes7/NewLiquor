@@ -16,10 +16,24 @@ class CategoryController extends Controller
     public function index()
     {
         return Inertia::render('Admin/Catalog', [
-            'categories' => Category::all(), // El camión que trae todo de la BD
+            'categories' => Category::all(), 
             'products' => \App\Models\Product::with(['category', 'variants.multimedia'])->get()
         ]);
     }
+
+    public function getCarousel()
+    {
+        
+        $categories = \App\Models\Category::select('id', 'name', 'image')
+            ->whereNull('parent_id')
+            ->whereNotNull('image')
+            ->where('image', '!=', '')
+            ->take(8)
+            ->get();
+
+        return response()->json($categories);
+    }
+
 
     /**
      * Actualiza una categoría desde el Modal de React

@@ -1,79 +1,69 @@
-//COMPONENTE TARJETA DE PRODUCTO DESTACADO
-//descripción: Componente de tarjeta para mostrar productos destacados con animaciones y efectos visuales atractivos.
-import React from 'react';
-
+import React, { useState } from 'react';
 import { Link } from '@inertiajs/react';
-import { useState } from 'react';
 
 export default function FeaturedProductCard({ product }) {
-  const [isHovered, setIsHovered] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
 
-  // Obtenemos la primera imagen o un placeholder
-  const mainImage = product.main_image || `https://via.placeholder.com/480x640?text=${product.name}`;
+    // Los datos vienen normalizados de tu FeaturedProductResource
+    const mainImage = product.main_image;
+    const brand = product.brand || "Destilería";
+    const category = product.category || "Licor";
 
-  return (
-    <Link
-      href={`/products/${product.slug}/${product.id}`}
-      className="group relative bg-white rounded-xl overflow-hidden border border-gray-200 transition-all duration-500 hover:shadow-xl hover:border-gray-300 flex flex-col h-full"
-      style={{
-        animationDelay: `${product.id * 80}ms`,
-        opacity: 1 // Forzamos la visibilidad para descartar fallos de CSS
-    }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Etiqueta Flotante (Label del FeaturedProduct) */}
-      {product.label && (
-        <div className="absolute top-3 left-3 z-20">
-          <span className="bg-black text-white text-[10px] font-black px-2 py-1 uppercase tracking-widest rounded-sm shadow-lg">
-            {product.label}
-          </span>
-        </div>
-      )}
-
-      {/* Contenedor de Imagen con Efectos */}
-      <div className="relative aspect-[3/4] bg-gray-50 overflow-hidden">
-        <img
-          src={mainImage}
-          alt={product.name}
-          className="absolute inset-0 w-full h-full object-contain p-4 transition-transform duration-700 group-hover:scale-110"
-        />
-        
-        {/* Overlay Gradiente al hacer Hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        
-        {/* Efecto Shine (Brillo) */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
-          <div className="absolute top-0 -left-full w-1/2 h-full bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12 animate-shine" />
-        </div>
-      </div>
-
-      {/* Información del Producto */}
-      <div className="relative px-4 py-5 text-center flex flex-col flex-grow">
-        <h3 className="text-sm font-bold text-black tracking-tight leading-tight uppercase min-h-[40px] flex items-center justify-center">
-          {product.name}
-        </h3>
-
-        <h2 className="text-sm text-gray-400 tracking-tight leading-none uppercase min-h-[20px] flex items-center justify-center">
-          {product.description}
-        </h2>
-        
-        <p className="mt-2 text-lg font-black text-red-700 flex-grow flex items-center justify-center">
-          BOB {parseFloat(product.price).toFixed(2)}
-        </p>
-
-        {/* Botón dinámico (Ver modelos / Añadir) */}
-        <div
-          className={`mt-4 flex justify-center items-center gap-2 text-xs font-black uppercase tracking-widest text-black transition-all duration-500 ${
-            isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
-          }`}
+    return (
+        <Link
+            href={`/productos/${product.slug || product.id}`}
+            className="group relative flex flex-col h-full bg-white rounded-[2rem] transition-all duration-700 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] border border-transparent hover:border-gray-100 p-2"
+            style={{
+              animationDelay: `${product.variant_id * 80}ms`, 
+              opacity: 1 
+          }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
         >
-          <span className="border-b-2 border-black">Ver detalles</span>
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-          </svg>
-        </div>
-      </div>
-    </Link>
-  );
+            {/* Badge de Categoría Flotante - Muy minimalista */}
+            <div className="absolute top-5 left-5 z-20">
+                <span className="bg-white/80 backdrop-blur-md text-[9px] font-black px-3 py-1 uppercase tracking-[0.2em] rounded-full border border-gray-500 text-gray-700">
+                    {category}
+                </span>
+            </div>
+
+            {/* Contenedor de Imagen: Fondo gris muy suave y padding para que la botella respire */}
+            <div className="relative aspect-[4/5] bg-[#F9F9F9] rounded-[1.8rem] overflow-hidden flex items-center justify-center p-8">
+                <img
+                    src={mainImage}
+                    alt={product.name}
+                    className="w-full h-full object-contain transition-transform duration-1000 ease-out group-hover:scale-110"
+                />
+                
+                {/* Sutil gradiente al fondo para dar profundidad */}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            </div>
+
+            {/* Información: Tipografía elegante */}
+            <div className="px-4 py-6 text-center">
+                <p className="text-[10px] font-bold text-black uppercase tracking-[0.3em] mb-2">
+                    {brand}
+                </p>
+                
+                {/* Nombre en Itálica para ese look "Premium" de la foto 3 */}
+                <h3 className="text-xl font-black text-darkGray italic leading-tight tracking-tight min-h-[3.5rem] flex items-center justify-center">
+                    {product.name}
+                </h3>
+                
+                <div className="mt-4 flex flex-col items-center">
+                    <p className="text-2xl font-black text-darkGray">
+                        <span className="text-xs mr-1 text-gray-400 font-medium">BOB</span>
+                        {parseFloat(product.price).toLocaleString('es-BO', { minimumFractionDigits: 2 })}
+                    </p>
+                </div>
+
+                {/* Botón de acción con el color de tu marca */}
+                <div className={`mt-5 flex justify-center transition-all duration-500 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                    <span className="bg-darkGray text-white text-[10px] font-black uppercase tracking-[0.2em] px-8 py-3 rounded-xl shadow-lg shadow-black/10">
+                        Explorar
+                    </span>
+                </div>
+            </div>
+        </Link>
+    );
 }

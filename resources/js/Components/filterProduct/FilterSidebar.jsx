@@ -1,158 +1,173 @@
-//COMPONENTE BARRA LATERAL DE FILTROS
-//descripción: Componente de barra lateral para aplicar filtros en la página de productos, sincronizado con la URL y Laravel mediante Inertia.js.
 import React, { useEffect, useState } from "react";
 import FilterSelect from "./FilterSelect";
 import { router, usePage } from "@inertiajs/react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown, Filter, X } from "lucide-react";
 
 export default function FilterSidebar({ filtersData = [] }) {
     const { url } = usePage();
-    // 1. Función para obtener filtros de la URL de forma segura
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    const MAX_LIMIT = 1500;
+    const [priceRange, setPriceRange] = useState(0);
+
     const getQueryParams = () => {
         if (typeof window === "undefined") return {};
         const params = new URLSearchParams(window.location.search);
         return Object.fromEntries(params.entries());
     };
 
-    // 2. Estado local sincronizado con la URL
     const [selectedFilters, setSelectedFilters] = useState(getQueryParams());
 
-    // Sincronizar el estado si la URL cambia (por ejemplo, al darle atrás en el navegador)
     useEffect(() => {
         const params = new URLSearchParams(url.split("?")[1] || "");
-        setSelectedFilters(Object.fromEntries(params.entries()));
+        const entries = Object.fromEntries(params.entries());
+        setSelectedFilters(entries);
+        
+        // 2. CORRECCIÓN: Si no hay max_price en la URL, el slider debe volver a 0
+        if (entries.max_price) {
+            setPriceRange(entries.max_price);
+        } else {
+            setPriceRange(0); 
+        }
     }, [url]);
 
     const handleFilterChange = (filterLabel, value) => {
-        // Creamos el nuevo objeto de filtros
-        const newFilters = {
-            ...selectedFilters,
-            [filterLabel]: value,
-            page: "1", // Reiniciamos a la primera página al cambiar un filtro
-        };
-
-        // Si el valor es vacío, eliminamos la propiedad para limpiar la URL
+        const newFilters = { ...selectedFilters, [filterLabel]: value, page: "1" };
         if (!value) delete newFilters[filterLabel];
+        
+        // 3. CORRECCIÓN: Si borramos el chip, el slider vuelve a 0 (neutro)
+        if (filterLabel === 'max_price' && !value) {
+            setPriceRange(0);
+        }
 
-        // Actualizamos estado local para respuesta instantánea
         setSelectedFilters(newFilters);
-
-        // 3. Petición a Laravel mediante Inertia
-        router.get("/", newFilters, {
+        router.get(window.location.pathname, newFilters, {
             preserveState: true,
             preserveScroll: true,
             replace: true,
         });
     };
 
-    if (!Array.isArray(filtersData)) return null;
+    const handlePriceChange = (e) => {
+        setPriceRange(e.target.value);
+    };
 
-    //para que no recarge toda la pagina al oprimir limpiar filtros
+    let priceTimeout; 
+
+    const applyPriceFilter = () => {
+        // 1. Cancelamos cualquier temporizador anterior si el usuario sigue moviendo el slider
+        if (priceTimeout) clearTimeout(priceTimeout);
+
+        // 2. Programamos la petición para que ocurra 300ms después de que el usuario se detenga
+        priceTimeout = setTimeout(() => {
+            if (priceRange == 0) {
+                handleFilterChange('max_price', "");
+            } else {
+                // Enviamos la petición definitiva
+                handleFilterChange('max_price', priceRange);
+            }
+        }, 300); // 300ms es un buen equilibrio entre respuesta rápida y debounce
+    };
+
     const handleClearFilters = () => {
         setSelectedFilters({});
-        router.get(
-            "/",
-            {},
-            {
-                preserveState: true,
-                preserveScroll: true,
-                replace: true,
-                only: ["product", "filtersData", "totalProducts"],
-            },
-        );
+        setPriceRange(0); // Reset a neutro
+        router.get(window.location.pathname, {}, {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        });
     };
 
-    //variantes para animaciones
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1, // Los hijos aparecen uno tras otro
-            },
-        },
-    };
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 10 },
-        visible: { opacity: 1, y: 0 },
-    };
+    const allowedFilters = ["Tamaño", "Tipo", "Marca"];
+    const filteredSidebarData = filtersData.filter(f => allowedFilters.includes(f.name));
 
     return (
-        <aside className="w-full md:w-64 flex-shrink-0 pr-8">
-         
-            {/* Contenedor Flex para alinear Título y Botón */}
-            <div className="mb-2">
-                
+        <>
+            {/* BOTÓN MÓVIL */}
+            <button 
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden w-full mb-6 flex items-center justify-between bg-darkGray text-white px-6 py-4 rounded-2xl font-bold uppercase text-[10px] tracking-widest shadow-lg active:scale-95 transition-all"
+            >
+                <div className="flex items-center gap-2">
+                    <Filter size={14} className="text-turquoise" />
+                    {Object.keys(selectedFilters).filter(k => k !== 'page').length > 0 
+                        ? `Filtros activos (${Object.keys(selectedFilters).filter(k => k !== 'page').length})` 
+                        : 'Filtrar Licores'}
+                </div>
+                <ChevronDown className={`transition-transform ${isMobileMenuOpen ? 'rotate-180' : ''}`} size={16} />
+            </button>
 
-                <div className="flex flex-wrap gap-2">
-                    {Object.entries(selectedFilters).map(
-                        ([key, val]) =>
+            <aside className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:block w-full md:w-64 flex-shrink-0 md:pr-8`}>
+                
+                {/* CHIPS DE FILTROS ACTIVOS */}
+                <div className="mb-6">
+                    <div className="flex flex-wrap gap-2">
+                        {Object.entries(selectedFilters).map(([key, val]) => (
                             key !== "page" && (
                                 <button
                                     key={key}
                                     onClick={() => handleFilterChange(key, "")}
-                                    className="flex items-center gap-2 px-3 py-1 bg-[#f5f1e8] border border-[#d4c5a1] rounded-full text-[10px] font-bold uppercase text-[#8b7a5e] hover:bg-[#ede5d1] transition-colors"
+                                    className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 border border-gray-300 rounded-full text-[9px] font-black uppercase text-darkGray hover:border-turquoise transition-all"
                                 >
-                                    {val} <span className="text-xs">×</span>
+                                    {key === 'max_price' ? `Hasta BOB ${val}` : val} 
+                                    <X size={10} className="text-turquoise" />
                                 </button>
-                            ),
+                            )
+                        ))}
+                    </div>
+                    {Object.keys(selectedFilters).filter(k => k !== 'page').length > 0 && (
+                        <button onClick={handleClearFilters} className="text-[9px] font-black uppercase tracking-widest text-turquoise hover:underline mt-3 block transition-all">
+                            BORRAR FILTROS
+                        </button>
                     )}
                 </div>
 
-                {/* Botón alineado a la derecha */}
-                <AnimatePresence>
-                    {Object.keys(selectedFilters).length > 0 && (
-                        <motion.button
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={handleClearFilters}
-                            className="text-[10px] font-bold uppercase tracking-wider text-turquoise bg-turquoise/5 px-2 py-1 rounded-sm hover:bg-turquoise hover:text-white transition-colors duration-300"
-                        >
-                            borrar todos los filtros
-                        </motion.button>
-                    )}
-                </AnimatePresence>
-            </div>
+                <div className="flex flex-col gap-2">
+                    {/* SLIDER DE PRECIO MEJORADO */}
+                    <div className="py-4 border-t border-b border-gray-200 mb-2">
+                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-darkGray mb-4">
+                            Presupuesto (Máx)
+                        </h3>
+                        <div className="px-1">
+                            <div className="flex justify-between items-center mb-3">
+                                <span className="text-[10px] font-bold text-gray-700 uppercase">
+                                    {priceRange == 0 ? "Filtro Off" : "BOB 0"}
+                                </span>
+                                <span className={`text-sm font-black px-3 py-1 rounded-lg border transition-all ${priceRange == 0 ? 'text-gray-700 bg-gray-50 border-gray-100' : 'text-turquoise bg-turquoise/5 border-turquoise/20'}`}>
+                                    {priceRange == 0 ? "VER TODO" : `BOB ${priceRange}`}
+                                </span>
+                            </div>
+                            <input 
+                                type="range" 
+                                min="0" 
+                                max={MAX_LIMIT} 
+                                step="10"
+                                value={priceRange}
+                                onChange={handlePriceChange}
+                                onMouseUp={applyPriceFilter}
+                                onTouchEnd={applyPriceFilter}
+                                className={`w-full h-1.5 rounded-lg appearance-none cursor-pointer transition-all ${priceRange == 0 ? 'bg-gray-200 accent-gray-400' : 'bg-gray-100 accent-turquoise'}`}
+                            />
+                        </div>
+                    </div>
 
-            <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className="space-y-0 border-t border-gray-100 pt-0"
-            >
-                {/* Filtros dinámicos de Laravel */}
-                {filtersData.length > 0 ? (
-                    filtersData.map((filter) => (
-                        <motion.div
-                            key={filter.name}
-                            variants={itemVariants}
-                            className="border-b border-gray-50 last:border-0"
-                        >
+                    {/* SELECTS RESTANTES */}
+                    <div className="divide-y divide-gray-700">
+                        {filteredSidebarData.map((filter) => (
                             <FilterSelect
                                 key={filter.name}
                                 label={filter.name}
                                 options={filter.values}
                                 value={selectedFilters[filter.name] || ""}
-                                onChange={(val) =>
-                                    handleFilterChange(filter.name, val)
-                                }
-                                placeholder={`Selecciona ${filter.name}`}
+                                onChange={(val) => handleFilterChange(filter.name, val)}
+                                placeholder={`Cualquier ${filter.name}`}
                             />
-                        </motion.div>
-                    ))
-                ) : (
-                    <motion.p
-                        variants={itemVariants}
-                        className="text-gray-400 text-sm py-4 italic"
-                    >
-                        No hay filtros disponibles
-                    </motion.p>
-                )}
-            </motion.div>
-        </aside>
+                        ))}
+                    </div>
+                </div>
+            </aside>
+        </>
     );
 }

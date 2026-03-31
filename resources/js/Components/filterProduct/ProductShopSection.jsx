@@ -1,84 +1,94 @@
-//COMPONENTE PRINCIPAL
-//PARA MOSTRAR LA SECCION DE PRODUCTOS CON FILTROS
-//descripción: Componente principal para mostrar la sección de productos con filtros aplicables en la página de tienda.
+import React, { useState, useEffect } from "react";
+import { router } from "@inertiajs/react";
 import FilterSidebar from "@/Components/filterProduct/FilterSidebar";
-
-import Pagination from "./Paginacion";
 import ProductCard from "../welcome/ProductCard";
+import { motion, AnimatePresence } from "framer-motion";
 
-export default function ProductShopSection({
-    product,
-    filtersData,
-    totalProducts,
-}) {
-    const items = Array.isArray(product) ? product : (product?.data || []);
-    const paginationLinks = product?.meta?.links || product?.links || [];
+export default function ProductShopSection({ product, filtersData, totalProducts }) {
     
-    // --- AÑADE ESTOS LOGS AQUÍ ---
-    console.log("1. Objeto 'product' completo recibido:", product);
-    console.log("2. 'items' extraídos para el map:", items);
-    console.log("3. Cantidad de productos encontrados:", items.length);
+    const [isFiltering, setIsFiltering] = useState(false);
+    const items = product.data || [];
+    console.log("--- DEBUG CATÁLOGO no2---");
+    console.log("Estructura completa de product:", product);
+    console.log("TotalProducts", totalProducts);
+    // Si usas paginación de Laravel, los datos están en product.data
+    const listaActual = product.data || product;
+    console.log("Lista de productos a renderizar:", listaActual);
+    
+    // Ver nombres para comparar con el backend
+    if(Array.isArray(listaActual)) {
+        console.table(listaActual.map(p => ({
+            id: p.id,
+            nombre: p.product?.name || "Sin nombre",
+            categoria: p.product?.category?.name || "Sin categoría"
+        })));
+    }
+    console.log("----------------------");
+    useEffect(() => {
+        // Escuchamos cuando inicia y termina la petición de Inertia
+        const start = router.on("start", (event) => {
+            if (event.detail.visit.url.pathname === window.location.pathname) {
+                setIsFiltering(true);
+            }
+        });
+
+        const finish = router.on("finish", () => {
+            setIsFiltering(false);
+        });
+
+        return () => {
+            start();
+            finish();
+        };
+    }, []);
 
     return (
-        <section className="bg-white">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* 1. NUEVO TITULO (BREADCRUMBS) */}
-                <div className="mb-4">
-                    <h3 className="text-[16px] font-bold uppercase tracking-widest text-gray-800 italic">
-                        Home <span className="mx-1 text-gray-300">/</span>{" "}
-                        Licores
-                    </h3>
-                </div>
+        <section className="bg-[#FFFFBF] py-10 relative">
+            <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row gap-10">
+                {/* El Sidebar se mantiene siempre visible y clickable */}
+                <FilterSidebar filtersData={filtersData} />
 
-                {/* FILA DE ENCABEZADOS SUPERIOR */}
-                {/* items-baseline asegura que el texto de la izquierda y derecha compartan la misma base */}
-                <div className="hidden md:flex items-baseline justify-between border-gray-100 pb-1 mb-2">
-                    {/* Ancho fijo de 64 (mismo que el sidebar) para alinear el título */}
-                    <div className="w-64">
-                        <h2 className="text-[13px] font-bold text-gray-500 uppercase tracking-tight">
-                            Filtrado por:
-                        </h2>
-                    </div>
+                <div className="flex-1 relative">
+                    {/* CAPA DE CARGA LOCALIZADA (Como en tu foto 2) */}
+                    <AnimatePresence>
+                        {isFiltering && (
+                            <motion.div 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] flex flex-col items-center justify-start pt-20"
+                            >
+                                <div className="bg-white p-6 rounded-3xl shadow-xl flex flex-col items-center gap-4 border border-gray-100">
+                                    {/* Spinner circular con tu color turquesa */}
+                                    <div className="w-10 h-10 border-4 border-black border-t-turquoise rounded-full animate-spin"></div>
+                                    <div className="text-center">
+                                        <p className="text-[11px] font-black uppercase tracking-widest text-darkGray">Cargando...</p>
+                                        <p className="text-[10px] text-black mt-1">Buscando productos</p>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
-                    {/* Conteo de productos - Ahora alineado a la izquierda del área de catálogo */}
-                    <div className="flex-1 text-left ml-10">
-                        {/* ml-10 para alinearlo con el inicio de la grid */}
-                        <p className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">
-                            {totalProducts} Products in total
-                        </p>
-                    </div>
-                </div>
-
-                <div className="flex flex-col md:flex-row gap-10">
-                    {/* Filtros */}
-                    <div className="w-full md:w-64 flex-shrink-0">
-                        <FilterSidebar filtersData={filtersData} />
-                    </div>
-
-                    {/* Catálogo */}
-                    <div className="flex-1">
-                        {/* Grilla de Productos  */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
-                            {items.length > 0 ? (
-                                items.map((product) => (
-                                    <ProductCard
-                                        key={product.id}
-                                        product={product}
-                                    />
-                                ))
-                            ) : (
-                                <p className="col-span-full text-center text-gray-500">
-                                    No products found.
-                                </p>
-                            )}
-                        </div>
-
-                        {/* SECCIÓN DE PAGINACIÓN (Numeritos) */}
-                      <div className="mt-10">
-                {paginationLinks.length > 0 && (
-                    <Pagination links={paginationLinks} />
-                )}
-            </div>
+                    {/* CUADRÍCULA DE PRODUCTOS */}
+                    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 transition-all duration-300 ${isFiltering ? 'grayscale-[0.5] opacity-50' : ''}`}>
+                        {items.length > 0 ? (
+                            items.map((item) => (
+                                <ProductCard 
+                                    /* CAMBIO AQUÍ: 
+                                    Si tu objeto tiene 'variant_id', úsalo. 
+                                    Si no, usa 'item.id' pero asegúrate de que el Backend 
+                                    esté mandando el ID de la variante en ese campo.
+                                    */
+                                    key={item.variant_id || item.id} 
+                                    product={item} 
+                                />
+                            ))
+                        ) : (
+                            <div className="col-span-full py-20 text-center text-black font-bold uppercase text-xs tracking-widest">
+                                No se encontraron botellas con esos filtros
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

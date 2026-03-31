@@ -31,41 +31,20 @@ class ProductController extends Controller
      */
     private function getFeaturedProducts()
     {
-        // 1. Obtener productos destacados configurados manualmente
-        $featuredProducts = FeaturedProduct::active()
-            ->with([
-                // Cambiamos la ruta: Multimedia ahora se cuelga de las variantes
-                'product.variants.multimedia', 
-                'product.category',
-                'variant.multimedia' // Variante específica destacada con su imagen
+        // Traemos las variantes más vendidas (puedes ajustar el número a 6 u 8)
+        $topVariants = ProductVariant::with([
+                'product.category', 
+                'multimedia'
             ])
+            ->where('available', 1)  
+            ->where('stock', '>', 0) 
+            ->orderBy('ventas_totales', 'desc') 
+            ->take(8) 
             ->get();
 
-        if ($featuredProducts->count() < 6) {
-            $necesidad = 6 - $featuredProducts->count();
-            $existingProductIds = $featuredProducts->pluck('product_id')->toArray();
-
-            // 2. Rellenar con productos aleatorios que tengan variantes disponibles
-            $additionalProducts = Product::whereHas('variants', function ($q) {
-                    $q->where('available', 1); // Filtro correcto en la tabla product_variant
-                })
-                ->whereNotIn('id', $existingProductIds)
-                ->with([
-                    'category', 
-                    'variants' => function($q) {
-                        $q->where('available', 1)->with('multimedia'); // Traemos la foto de la variante
-                    }
-                ])
-                ->inRandomOrder()
-                ->take($necesidad)
-                ->get();
-
-            // Combinar ambos conjuntos
-            $featuredProducts = $featuredProducts->concat($additionalProducts);
-        }
-
-        return FeaturedProductResource::collection($featuredProducts);
+        return FeaturedProductResource::collection($topVariants);
     }
+
 
     /**
      * Recupera solo la información básica del evento activo para el banner de inicio
@@ -139,43 +118,86 @@ class ProductController extends Controller
         $search = $request->query('search', '');
         $filters = $request->except(['search', 'page']);
 
-        // 1. Base de la Query con Eager Loading anidado
-        $queryProducts = Product::with([
-            'variants' => function($query) {
-                $query->where('available', 1) 
-                    ->with('multimedia');    
-            }, 
-            'category'
-        ])
-        ->whereHas('variants', function ($q) { 
-            $q->where('available', 1); 
-        });
+        // LOG 1: Ver qué llega en la petición
+        \Log::info("--- INICIO DE FILTRADO ---");
+        \Log::info("Buscador (search): " . ($search ?: 'vacía'));
+        \Log::info("Filtros activos: " . json_encode($filters));
 
-        // 2. Filtro por búsqueda (Nombre del producto o SKU de la variante)
+        $query = ProductVariant::with(['product.category', 'multimedia'])
+            ->where('available', 1);
+
         if ($search) {
-            $queryProducts->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%$search%")
-                    ->orWhereHas('variants', function($v) use ($search) {
-                        $v->where('sku', 'like', "%$search%") // Búsqueda por SKU
-                        ->orWhere('volumen', 'like', "%$search%"); // Búsqueda por volumen
-                    });
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('product', function($pq) use ($search) {
+                    $pq->where('name', 'like', "%{$search}%")
+                    ->orWhere('brand', 'like', "%{$search}%");
+                })
+                ->orWhere('sku', 'like', "%{$search}%")
+                ->orWhere('volume', 'like', "%{$search}%");
             });
         }
 
-        // 3. Filtros dinámicos (Ej: por volumen o precio)
         foreach ($filters as $key => $value) {
-            if ($value) {
-                $queryProducts->whereHas('variants', function ($q) use ($key, $value) {
-                    // Ajustamos para que coincida con las columnas de products_variants
-                    $q->where($key, $value); 
-                });
+            if (!$value) continue;
+
+            // LOG 2: Ver cada filtro procesado
+            \Log::info("Procesando filtro: [$key] con valor: [$value]");
+
+            switch ($key) {
+                case 'max_price':
+                    if ((float)$value > 0) {
+                        $query->where('price', '<=', (float)$value);
+                    }
+                    break;
+
+                case 'Tipo':
+                    $query->whereHas('product.category', function($cq) use ($value) {
+                        // LOG 3: Ver qué nombre de categoría busca exactamente
+                        \Log::info("SQL -> Buscando categoría con nombre exacto: '$value'");
+                        $cq->where('name', $value);
+                    });
+                    break;
+
+                case 'Marca':
+                    $query->whereHas('product', function($pq) use ($value) {
+                        $pq->where('brand', $value);
+                    });
+                    break;
+
+                case 'Tamaño':
+                    $query->where('volume', $value);
+                    break;
             }
         }
 
-        // Paginación final
-        $paginatedProducts = $queryProducts->paginate($perPage)->withQueryString();
+        // LOG 4: Ver la consulta SQL final generada antes de ejecutarla
+        \Log::info("SQL FINAL: " . $query->toSql());
+        \Log::info("BINDINGS: " . json_encode($query->getBindings()));
 
-        return $paginatedProducts;
+        $result = $query->orderBy('id', 'desc')
+                        ->paginate($perPage)
+                        ->withQueryString();
+
+        \Log::info("Productos encontrados: " . $result->total());
+        \Log::info("--- FIN DE FILTRADO ---");
+        
+        if ($result->count() > 0) {
+            \Log::info("=== LISTA DE VARIANTES ENVIADAS AL FRONT ===");
+            foreach ($result as $variant) {
+                \Log::info(sprintf(
+                    "ID Variante: %s | Producto: %s | Marca: %s | Categoría: %s | Precio: %s",
+                    $variant->id,
+                    $variant->product->name ?? 'N/A',
+                    $variant->product->brand ?? 'N/A',
+                    $variant->product->category->name ?? 'N/A',
+                    $variant->price
+                ));
+            }
+            \Log::info("============================================");
+        } else {
+            \Log::info("AVISO: La consulta no devolvió ningún producto para estos filtros.");
+        }
+        return $result;
     }
 
     public function index(Request $request)
@@ -184,47 +206,61 @@ class ProductController extends Controller
         $filters = $request->except(['search', 'page']);
         $perPage = 12;
 
-        // Lógica de Categorías
-        $categoryQuery = Category::whereNull('parent_id')
-            ->when($search, fn($q) => $q->where('name', 'like', "%$search%"));
+        $categorias = Category::select('name')
+            ->orderBy('name', 'asc')
+            ->get()
+            ->map(fn($cat) => [
+                'value' => $cat->name,
+                'label' => mb_strtoupper($cat->name), 
+            ]);
+       
+        $marcas = Product::select('brand')
+            ->whereNotNull('brand')
+            ->distinct()
+            ->orderBy('brand', 'asc')
+            ->get()
+            ->map(fn($p) => [
+                'value' => $p->brand,
+                'label' => mb_strtoupper($p->brand),
+            ]);
 
-        $allCategories = $categoryQuery->get()->map(fn($category) => [
-            'id' => $category->id,
-            'name' => $category->name,
-            'description' => $category->description,
-            'slug' => $category->slug,
-            'image' => $category->image ?? null,
-        ]);
+        $tamanos = ProductVariant::select('volume')
+            ->whereNotNull('volume')
+            ->distinct()
+            ->get()
+            ->map(fn($v) => [
+                'value' => $v->volume,
+                'label' => $v->volume,
+            ]);
 
-        // Lógica de Atributos para el Sidebar
-        $filtersData = ProductAttribute::with('values')->get()->map(fn($attribute) => [
-            'id' => $attribute->id,
-            'name' => $attribute->name,
-            'values' => $attribute->values->map(fn($value) => [
-                'value' => $value->value,
-                'label' => ucfirst($value->value),
-            ])->values(),
-        ]);
+        $filtersData = [
+            ['name' => 'Tipo', 'values' => $categorias],
+            ['name' => 'Marca', 'values' => $marcas],
+            ['name' => 'Tamaño', 'values' => $tamanos],
+        ];
 
-        // Obtener productos filtrados y paginados
         $productCrudo = $this->getFilteredProducts($request, $perPage);
+
         $product = FeaturedProductResource::collection($productCrudo)->additional([
             'meta' => [
                 'total' => $productCrudo->total(),
             ]
         ]);
 
+        $allCategories = Category::whereNull('parent_id')
+            ->when($search, fn($q) => $q->where('name', 'like', "%$search%"))
+            ->get();
+
         return Inertia::render('Welcome', [
-            'categories'       => $allCategories->forPage(1, $perPage)->values()->all(),
-            'search'           => $search,
-            'page'             => $productCrudo->currentPage(),
-            'hasMore'          => $allCategories->count() > $perPage,
-            'filtersData'      => fn() => $filtersData,
-            'activeFilters'    => $filters,
-            'product'         => $product, // Objeto paginado transformado
-            'totalProducts'    => $productCrudo->total(),
+            'categories'    => $allCategories->values()->all(),
+            'search'        => $search,
+            'page'          => $productCrudo->currentPage(),
+            'filtersData'   => $filtersData,
+            'activeFilters' => $filters,
+            'product'       => $product, 
+            'totalProducts' => $productCrudo->total(),
             'featuredProducts' => $this->getFeaturedProducts(),
-            'eventos'          => $this->getFeaturedEvent()
+            'eventos'       => $this->getFeaturedEvent()
         ]);
     }
 
